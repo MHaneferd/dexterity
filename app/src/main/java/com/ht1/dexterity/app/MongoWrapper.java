@@ -139,7 +139,7 @@ public static void main(String[] args) {
 
      public boolean WriteDebugDataToMongo(String message)
      {
-    	 String complete = machineName_ + " " + new Date().toLocaleString() + " " + message;
+    	 String complete = machineName_ + " " + new Date(new TimeWrapper().getTime()).toLocaleString() + " " + message;
     	 BasicDBObject doc = new BasicDBObject("DebugMessage", complete);
     	 return WriteToMongo(doc);
      }
@@ -180,6 +180,8 @@ public static void main(String[] args) {
     	System.out.println( "Starting to read from mongodb"); 
     	 
     	List<TransmitterRawData> trd_list = new LinkedList<TransmitterRawData>();
+    	/*
+        This function can not compile here and is not used in this project...?s
       	DBCollection coll;
       	TransmitterRawData lastTrd = null;
       	try {
@@ -224,6 +226,7 @@ public static void main(String[] args) {
  		}finally {
   			closeMongoDb();
   		}
+  		*/
       	return trd_list;
     	 
      }

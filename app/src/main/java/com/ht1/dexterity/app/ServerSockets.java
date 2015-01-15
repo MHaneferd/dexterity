@@ -135,8 +135,8 @@ public class ServerSockets  extends Thread {
         public void run(){
             Gson gson = new GsonBuilder().create();
             ComunicationHeader ch;
-    
-            Log.i(TAG, "ServerSockets: client thread starting...");
+
+             Log.i(TAG, "ServerSockets: client thread starting...");
 
             try {
                 m_clientSocket.setSoTimeout(4000);
@@ -177,9 +177,16 @@ public class ServerSockets  extends Thread {
                 for (ListIterator<TransmitterRawData> iter = rawDataList.listIterator(); objectsToReturn > 0; ) {
                     TransmitterRawData element = iter.next();
                     // set the relative time
-                    element.RelativeTime = new Date().getTime() - element.CaptureDateTime;
-                    outputLine = gson.toJson(element);
-                    out.println(outputLine);
+                    element.RelativeTime = new TimeWrapper().getTime() - element.CaptureDateTime;
+                    
+                    if (element.RelativeTime <= 0) {
+                    	// we will remove objects that are in the future, this can happen in casses of errors with clock.
+                    	// we will not send it, and the list will be shorter... 
+                    	Log.e(TAG, "Error throwing objects with negative time");
+                    } else {
+                        outputLine = gson.toJson(element);
+                    	out.println(outputLine);
+                    }
                     objectsToReturn--;
                 }
                 // Mark that we have finished sending.

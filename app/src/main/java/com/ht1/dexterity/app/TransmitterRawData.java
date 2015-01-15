@@ -131,7 +131,7 @@ public class TransmitterRawData {
         TransmitterId = id;
         BatteryLife = Integer.parseInt(battery);
         ReceivedSignalStrength = Integer.parseInt(rssi);
-        CaptureDateTime = new Date().getTime();
+        CaptureDateTime = new TimeWrapper().getTime();
         UploaderBatteryLife = uploaderBattery;
 
         Uploaded = 0;
@@ -152,7 +152,7 @@ public class TransmitterRawData {
         BatteryLife = Integer.parseInt(parsed[3]);
         ReceivedSignalStrength = Integer.parseInt(parsed[4]);
         TransmissionId = Integer.parseInt(parsed[5]);
-        CaptureDateTime = new Date().getTime();
+        CaptureDateTime = new TimeWrapper().getTime();
 
         Intent i = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         UploaderBatteryLife = i.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
