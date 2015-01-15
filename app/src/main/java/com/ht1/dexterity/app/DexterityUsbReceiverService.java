@@ -104,7 +104,8 @@ public class DexterityUsbReceiverService extends Service
         // Start logging to logcat
         String filePath = Environment.getExternalStorageDirectory() + "/tzachilogcat.txt";
         try {
-            Runtime.getRuntime().exec(new String[]{"logcat", "-f", filePath, "-v", "threadtime", "tzachi:V", "*:S"});
+        	String[] cmd = { "/system/bin/sh", "-c", "ps | grep logcat  || logcat -f " + filePath + " -v threadtime tzachi:V *:E -r 10240 -n 8" };
+        	Runtime.getRuntime().exec(cmd);
         } catch (IOException e2) {
             // TODO Auto-generated catch block
             e2.printStackTrace();
