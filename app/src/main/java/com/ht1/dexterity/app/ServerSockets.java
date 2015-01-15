@@ -44,8 +44,9 @@ public class ServerSockets  extends Thread {
 
     void PrintSocketStatus(String Str) 
     {
-        mDebugString += Str;
-        mContext.sendBroadcast(new Intent("NEW_PRINT"));
+    	// The two lines below make debugging easy but consume infinite memory...
+        // mDebugString += Str;
+        // mContext.sendBroadcast(new Intent("NEW_PRINT"));
         Log.i(TAG, Str);
     }
 
