@@ -173,7 +173,7 @@ public class SerialPortReader
     						//Not a G4 Packet?
                             ShowToast("Worker thread IOException: " + e.hashCode());
                             // abort this thread
-                            Log.e(TAG, "WTF ???????????/ why are we getting out ?????????");
+                            Log.e(TAG, "cought io exception WTF ???????????/ why are we getting out ?????????");
                             mStop = true;
     						e.printStackTrace();
     					}
@@ -186,6 +186,7 @@ public class SerialPortReader
     			}
     			catch (IOException e)
     			{
+    				Log.e(TAG,"cought io exception");
     				e.printStackTrace();
     			}
                 done();
@@ -200,7 +201,7 @@ public class SerialPortReader
 	{
 		mError = sError;
 		ShowToast(mError);
-		Log.i(TAG, mError);
+		Log.e(TAG, mError);
 	}
 
 	
