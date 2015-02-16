@@ -139,8 +139,9 @@ public static void main(String[] args) {
 
      public boolean WriteDebugDataToMongo(String message)
      {
-    	 String complete = machineName_ + " " + new Date(new TimeWrapper().getTime()).toLocaleString() + " " + message;
-    	 BasicDBObject doc = new BasicDBObject("DebugMessage", complete);
+    	 Long CaptureDateTime = new TimeWrapper().getTime();
+    	 String complete = machineName_ + " " + new Date(CaptureDateTime).toLocaleString() + " " + message;
+    	 BasicDBObject doc = new BasicDBObject("DebugMessage", complete).append("CaptureDateTime", CaptureDateTime);
     	 return WriteToMongo(doc);
      }
 

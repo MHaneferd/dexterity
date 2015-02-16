@@ -184,7 +184,8 @@ public static void main(String[] args) {
       	TransmitterRawData lastTrd = null;
       	try {
       		coll = openMongoDb();
-      		DBCursor cursor = coll.find();
+            BasicDBObject query = new BasicDBObject("RawValue", new BasicDBObject("$exists", true));
+            DBCursor cursor = coll.find(query);
             cursor.sort(new BasicDBObject("CaptureDateTime", -1));
             try {
                 while(cursor.hasNext() && trd_list.size() < numberOfRecords) {
