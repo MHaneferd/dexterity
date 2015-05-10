@@ -284,7 +284,9 @@ class ReadData {
 
 
             // Real client code
-            Socket MySocket = new Socket(hostName, port);
+            InetSocketAddress ServerAdress = new InetSocketAddress(hostName, port);
+            Socket MySocket = new Socket();
+            MySocket.connect(ServerAdress, 10000);
 
             System.out.println("After the new socket \n");
             MySocket.setSoTimeout(2000); 
