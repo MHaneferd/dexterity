@@ -76,7 +76,7 @@ public class SerialPortReader
 
 	public void StopThread()
 	{
-	    Log.w(TAG, "StopThread Called");
+	    Log.w(TAG, "SerialPortReader StopThread Called");
 		if(mThread != null)
 			mStop = true;
     }
@@ -89,7 +89,7 @@ public class SerialPortReader
 	public void ShowToast(final String toast)
 	{
 		// push a notification rather than toast.
-	    Log.w(TAG, "ShowToast Called " + toast);
+	    Log.w(TAG, "SerialPortReader ShowToast Called " + toast);
 		NotificationManager NM = (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 		Notification n = new Notification.Builder(mContext)
 				.setContentTitle("Dexterity receiver")
@@ -160,7 +160,12 @@ public class SerialPortReader
     					{
                             //??????????Log.i(TAG, "Reading the wixel...");
     						// read aborts when the device is disconnected
+    						long Start = new Date().getTime();
                             int len = SerialPort.read(rbuf, 30000);
+                            long End = new Date().getTime();
+                            if (End - Start > 60000) {
+                            	Log.wtf(TAG, "Read took " + (End-Start) + " Instead of 30,000 Start = " + Start);
+                            }
                             if (len > 0)
                             {
                                 rbuf[len] = 0;
@@ -182,17 +187,17 @@ public class SerialPortReader
     
     				// do this last as it can throw
                     SerialPort.close();
-    				Log.i(TAG, "mStop is true, stopping read process");
+    				Log.i(TAG, "SerialPortReader mStop is true, stopping read process");
     			}
     			catch (IOException e)
     			{
-    				Log.e(TAG,"cought io exception");
+    				Log.e(TAG,"SerialPortReader cought io exception");
     				e.printStackTrace();
     			}
                 done();
 		    }
 		    finally {
-		      Log.e(TAG, "We are leaving the SerialPortReader run do we know why???? ");
+		      Log.e(TAG, "SerialPortReader We are leaving the SerialPortReader run do we know why???? ");
 		    }
 		}
 	};
@@ -222,6 +227,7 @@ public class SerialPortReader
 		    MongoWrapper mt = CreateMongoWrapper();
 		    boolean WritenToDb = mt.WriteDebugDataToMongo("Allive, usb connected to wixler");
 	        if(WritenToDb) {
+	        	Log.e(TAG,"Writing to mongodb that I'm alive... ");
 	        	mLastDbWriteTime = new Date().getTime();
 	        }
 		}
@@ -233,7 +239,10 @@ public class SerialPortReader
 		TransmitterRawData trd = new TransmitterRawData(buffer, len, mContext);
 		DexterityDataSource source = new DexterityDataSource(mContext);
 		trd = source.createRawDataEntry(trd);
+		Log.e(TAG,"Just created a TRD, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
 		List<TransmitterRawData> retryList = source.getAllDataObjects(true, true, 10000);
+		
+		Log.e(TAG, "retry list size is "+ retryList.size());
 		
 
         // we got the read, we should notify
@@ -244,12 +253,15 @@ public class SerialPortReader
 
 		for (int j = 0; j < retryList.size(); ++j) {
 			trd = retryList.get(j);
+			Log.e(TAG,"Before write TRD, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
 			WritenToDb = mt.WriteToMongo(trd);
 	        if(WritenToDb) {
+	        	Log.e(TAG,"Write succeeded TRD, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
 	        	mLastDbWriteTime = new Date().getTime();
 	        	trd.setUploaded(1);
 	        	source.updateRawDataEntry(trd);
 	        } else {
+	        	Log.e(TAG,"Write failed, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
 	        	break;
 	        }
      	}
