@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.eveningoutpost.dexdrip.Services;
+package com.ht1.dexterity.app;
 
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
@@ -38,13 +38,13 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.eveningoutpost.dexdrip.Models.ActiveBluetoothDevice;
-import com.eveningoutpost.dexdrip.Models.BgReading;
-import com.eveningoutpost.dexdrip.Sensor;
-import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
-import com.eveningoutpost.dexdrip.UtilityModels.ForegroundServiceStarter;
-import com.eveningoutpost.dexdrip.UtilityModels.HM10Attributes;
-import com.eveningoutpost.dexdrip.Models.TransmitterData;
+//import com.eveningoutpost.dexdrip.Models.ActiveBluetoothDevice;
+//import com.eveningoutpost.dexdrip.Models.BgReading;
+//import com.eveningoutpost.dexdrip.Sensor;
+//import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+//import com.eveningoutpost.dexdrip.UtilityModels.ForegroundServiceStarter;
+//import com.eveningoutpost.dexdrip.UtilityModels.HM10Attributes;
+//import com.eveningoutpost.dexdrip.Models.TransmitterData;
 
 import java.nio.charset.Charset;
 import java.nio.ByteBuffer;
@@ -55,14 +55,66 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
-import static com.activeandroid.ActiveAndroid.beginTransaction;
-import static com.activeandroid.ActiveAndroid.endTransaction;
-import static com.activeandroid.ActiveAndroid.setTransactionSuccessful;
-import com.activeandroid.query.Select;
+//import static com.activeandroid.ActiveAndroid.beginTransaction;
+//import static com.activeandroid.ActiveAndroid.endTransaction;
+//import static com.activeandroid.ActiveAndroid.setTransactionSuccessful;
+//import com.activeandroid.query.Select;
 
-@TargetApi(Build.VERSION_CODES.KITKAT)
+
+class ActiveBluetoothDevice {
+	private final static String TAG = DexCollectionService.class.getSimpleName();
+	
+	static ActiveBluetoothDevice first() {
+		return new ActiveBluetoothDevice();
+	}
+	
+	static void connected() {
+		Log.e(TAG, "Connected");
+		
+	}
+	static void disconnected() {
+		Log.e(TAG, "DisConnected");
+		
+	}
+	public String address = "20:C3:8F:F3:D2:C0"; 
+}
+
+
+class CollectionServiceStarter {
+	static boolean  isBTWixel(Context context) {
+		return true;
+	}
+	static boolean  isDexbridgeWixel(Context context) {
+		return false;
+	}
+
+}
+
+
+class ForegroundServiceStarter {
+
+
+    public ForegroundServiceStarter(Context context, Service service) {
+    }
+
+    public void start() {
+    }
+
+    public void stop() {
+    }
+
+}
+
+
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class DexCollectionService extends Service {
     private final static String TAG = DexCollectionService.class.getSimpleName();
+    
+    
+    public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
+    public static String HM_10_SERVICE = "0000ffe0-0000-1000-8000-00805f9b34fb";
+    public static String HM_RX_TX = "0000ffe1-0000-1000-8000-00805f9b34fb";
+    
     private String mDeviceAddress;
     SharedPreferences prefs;
 
@@ -83,8 +135,8 @@ public class DexCollectionService extends Service {
     private final int STATE_CONNECTING = BluetoothProfile.STATE_CONNECTING;
     private final int STATE_CONNECTED = BluetoothProfile.STATE_CONNECTED;
 
-    public final UUID xDripDataService = UUID.fromString(HM10Attributes.HM_10_SERVICE);
-    public final UUID xDripDataCharacteristic = UUID.fromString(HM10Attributes.HM_RX_TX);
+    public final UUID xDripDataService = UUID.fromString(HM_10_SERVICE);
+    public final UUID xDripDataCharacteristic = UUID.fromString(HM_RX_TX);
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -104,7 +156,7 @@ public class DexCollectionService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT){
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2){
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -222,6 +274,7 @@ public class DexCollectionService extends Service {
                 mBluetoothGatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 mConnectionState = STATE_DISCONNECTED;
+                lastdata = null;
                 ActiveBluetoothDevice.disconnected();
                 Log.w(TAG, "onConnectionStateChange: Disconnected from GATT server.");
                 setRetryTimer();
@@ -254,7 +307,7 @@ public class DexCollectionService extends Service {
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-
+        	Log.w(TAG, "onCharacteristicChanged entered");
             PowerManager powerManager = (PowerManager) mContext.getSystemService(mContext.POWER_SERVICE);
             PowerManager.WakeLock wakeLock1 = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                     "DexCollectionService");
@@ -358,7 +411,15 @@ public class DexCollectionService extends Service {
         mCharacteristic = null;
         mConnectionState = STATE_DISCONNECTED;
     }
-
+    
+    public void setSerialDataToTransmitterRawData(byte[] buffer, int len) {
+    	 StringBuilder data_string = new StringBuilder();
+         for (int i = 0; i < len; ++i) { 
+        	 data_string.append((char) buffer[i]); 
+        }
+         Log.w(TAG, "Just recieved a packet !!!" + data_string.toString());
+    }
+/*
     public void setSerialDataToTransmitterRawData(byte[] buffer, int len) {
         long timestamp = new Date().getTime();
         if (CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
@@ -441,4 +502,5 @@ public class DexCollectionService extends Service {
             }
         }
     }
+    */
 }

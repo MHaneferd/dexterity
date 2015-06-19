@@ -5,6 +5,12 @@
     <uses-feature android:name="android.hardware.usb.host" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    
+    
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -31,5 +37,11 @@
         </activity>
          
         <service android:name=".DexterityUsbReceiverService" />
+        
+        <service
+            android:name=".DexCollectionService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 </manifest>

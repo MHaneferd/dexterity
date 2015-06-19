@@ -46,6 +46,9 @@ public class DexterityActivity extends Activity
 		Intent serviceIntent = new Intent(this, DexterityUsbReceiverService.class);
 		startService(serviceIntent);
 
+		// Start the bt collection service
+		startService(new Intent(this, DexCollectionService.class));
+		
         setContentView(R.layout.activity_dexterity_main);
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
