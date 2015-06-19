@@ -36,8 +36,8 @@ public class SerialPortReader
 	private String mError = "";
 	private static final int  MAX_RECORDS_TO_UPLOAD = 6;
     private boolean mStop = false;
-    private long mLastDbWriteTime = 0;
-    private final String TAG = "tzachi";
+    static private long mLastDbWriteTime = 0;
+    private final static String TAG = "tzachi";
 
 	// private constructor so can only be instantiated from static member
 	private SerialPortReader(Context context)
@@ -210,10 +210,10 @@ public class SerialPortReader
 	}
 
 	
-	private MongoWrapper CreateMongoWrapper()
+	static private MongoWrapper CreateMongoWrapper(Context context)
 	{
 		// Create the mongo writer
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String MachineName = preferences.getString("machineName", "MachineUnknown");
         String dbUri = preferences.getString("dbUri", "mongodb://tzachi_dar:tzachi_dar@ds053958.mongolab.com:53958/nightscout");
         
@@ -224,7 +224,7 @@ public class SerialPortReader
 	private void NotifyAliveIfNeeded() 
 	{
 		if (new Date().getTime() - mLastDbWriteTime > 330000) {
-		    MongoWrapper mt = CreateMongoWrapper();
+		    MongoWrapper mt = CreateMongoWrapper(mContext);
 		    boolean WritenToDb = mt.WriteDebugDataToMongo("Allive, usb connected to wixler");
 	        if(WritenToDb) {
 	        	Log.e(TAG,"Writing to mongodb that I'm alive... ");
@@ -233,11 +233,16 @@ public class SerialPortReader
 		}
 	}
 	
-	private void setSerialDataToTransmitterRawData(byte[] buffer, int len)
+	private void setSerialDataToTransmitterRawData(byte[] buffer, int len){
+		TransmitterRawData trd = new TransmitterRawData(buffer, len, mContext);
+		setSerialDataToTransmitterRawData(mContext, trd);
+	}
+	
+	static public void setSerialDataToTransmitterRawData(Context context, TransmitterRawData trd)
 	{
 		boolean WritenToDb = false;
-		TransmitterRawData trd = new TransmitterRawData(buffer, len, mContext);
-		DexterityDataSource source = new DexterityDataSource(mContext);
+
+		DexterityDataSource source = new DexterityDataSource(context);
 		trd = source.createRawDataEntry(trd);
 		Log.e(TAG,"Just created a TRD, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
 		List<TransmitterRawData> retryList = source.getAllDataObjects(true, true, 10000);
@@ -246,10 +251,10 @@ public class SerialPortReader
 		
 
         // we got the read, we should notify
-        mContext.sendBroadcast(new Intent("NEW_READ"));
+        context.sendBroadcast(new Intent("NEW_READ"));
         
         // upload the data to the database
-        MongoWrapper mt = CreateMongoWrapper();
+        MongoWrapper mt = CreateMongoWrapper(context);
 
 		for (int j = 0; j < retryList.size(); ++j) {
 			trd = retryList.get(j);

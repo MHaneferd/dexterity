@@ -417,7 +417,23 @@ public class DexCollectionService extends Service {
          for (int i = 0; i < len; ++i) { 
         	 data_string.append((char) buffer[i]); 
         }
-         Log.w(TAG, "Just recieved a packet !!!" + data_string.toString());
+         Log.w(TAG, "Just recieved a packet !!! size " + len + " " + data_string.toString());
+         String[] data = data_string.toString().split("\\s+");
+         
+         int raw_data = Integer.parseInt(data[0]);
+         int sensor_battery_level = Integer.parseInt(data[1]);
+         int bridgeBattery = 100 * Integer.parseInt(data[2]);
+         int id = 0;
+         int filtered = 0;
+         if(data.length >= 4) {
+        	 String sid = data[3].substring(0,2);
+        	 String sfiltered = data[3].substring(2,5);
+        	 id = Integer.parseInt(sid);
+        	 filtered = 1000 * Integer.parseInt(sfiltered);
+         }
+         Log.w(TAG, "Creating a packet: " + id + " " +  raw_data+ " " +  filtered+ " " +  sensor_battery_level+ " " +  bridgeBattery);
+         TransmitterRawData trd = new TransmitterRawData(getApplicationContext(), id, raw_data, filtered, sensor_battery_level, bridgeBattery);
+         SerialPortReader.setSerialDataToTransmitterRawData(getApplicationContext(), trd);
     }
 /*
     public void setSerialDataToTransmitterRawData(byte[] buffer, int len) {
