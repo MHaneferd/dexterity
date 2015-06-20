@@ -431,8 +431,11 @@ public class DexCollectionService extends Service {
         	 id = Integer.parseInt(sid);
         	 filtered = 1000 * Integer.parseInt(sfiltered);
          }
-         Log.w(TAG, "Creating a packet: " + id + " " +  raw_data+ " " +  filtered+ " " +  sensor_battery_level+ " " +  bridgeBattery);
-         TransmitterRawData trd = new TransmitterRawData(getApplicationContext(), id, raw_data, filtered, sensor_battery_level, bridgeBattery);
+         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+         String transmitter_id = preferences.getString("transmitter_id", "63EWA");
+
+         Log.w(TAG, "Creating a packet: "+ transmitter_id +" " + id + " " +  raw_data+ " " +  filtered+ " " +  sensor_battery_level+ " " +  bridgeBattery);
+         TransmitterRawData trd = new TransmitterRawData(getApplicationContext(), transmitter_id, id, raw_data, filtered, sensor_battery_level, bridgeBattery);
          SerialPortReader.setSerialDataToTransmitterRawData(getApplicationContext(), trd);
     }
 /*

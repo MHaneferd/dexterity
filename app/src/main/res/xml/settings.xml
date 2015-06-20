@@ -26,6 +26,14 @@
                 android:defaultValue="mongodb://user:pass@ds053958.mongolab.com:53958/nightscout"
         />
         
+        <EditTextPreference
+                android:title="@string/transmitter_id"
+                android:summary="@string/transmitter_id_summary"
+                android:key="transmitter_id"
+                android:inputType="text"
+                android:defaultValue="63EWA"
+        />
+        
         
         </PreferenceCategory>
 </PreferenceScreen>

@@ -1,12 +1,12 @@
 package com.ht1.dexterity.app;
 
 import android.app.Activity;
-
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -47,7 +47,9 @@ public class DexterityActivity extends Activity
 		startService(serviceIntent);
 
 		// Start the bt collection service
-		startService(new Intent(this, DexCollectionService.class));
+		if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+			startService(new Intent(this, DexCollectionService.class));
+		}
 		
         setContentView(R.layout.activity_dexterity_main);
         mNavigationDrawerFragment = (NavigationDrawerFragment)

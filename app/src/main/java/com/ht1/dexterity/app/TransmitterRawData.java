@@ -138,10 +138,11 @@ public class TransmitterRawData {
         UploadAttempts = 1;
     }
 
-    public TransmitterRawData(Context context, int id, int raw, int filtered, int Sensor_battery, int bridgeBattery){
+    public TransmitterRawData(Context context, String transmitter_id, int transmission_id, int raw, int filtered, int Sensor_battery, int bridgeBattery){
+    	TransmitterId = transmitter_id;
         RawValue = raw;
         FilteredValue = filtered;
-        TransmissionId = id;
+        TransmissionId = transmission_id;
         BatteryLife = Sensor_battery;
         CaptureDateTime = new TimeWrapper().getTime();
         Intent i = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));

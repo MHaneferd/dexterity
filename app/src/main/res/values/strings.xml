@@ -29,5 +29,9 @@
     
     <string name="db_uri">standard URI</string>
     <string name="db_uri_summary">Set the standard URI based on the mongolab addresses</string>
-    
+
+    <string name="transmitter_id">Transmitter id</string>
+    <string name="transmitter_id_summary">Written at the back of trasmitter. Use 0 in order not to filter. When BT is used, will be set on the record. When USB will be used to filter</string>
+
+    </string-array>    
 </resources>

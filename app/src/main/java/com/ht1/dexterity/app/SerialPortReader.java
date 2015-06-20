@@ -235,7 +235,15 @@ public class SerialPortReader
 	
 	private void setSerialDataToTransmitterRawData(byte[] buffer, int len){
 		TransmitterRawData trd = new TransmitterRawData(buffer, len, mContext);
-		setSerialDataToTransmitterRawData(mContext, trd);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        String transmitter_id = preferences.getString("transmitter_id", "63EWA");
+
+        if(trd.TransmitterId.equals(transmitter_id) || transmitter_id.equals("0")  || transmitter_id.length() ==0) {
+    		setSerialDataToTransmitterRawData(mContext, trd);
+        	return;
+        }
+    	Log.e(TAG,"Throwing away packet with wrong tramsission id " + trd.toTableString());
+        
 	}
 	
 	static public void setSerialDataToTransmitterRawData(Context context, TransmitterRawData trd)
