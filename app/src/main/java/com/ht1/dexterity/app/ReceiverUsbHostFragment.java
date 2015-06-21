@@ -38,6 +38,7 @@ public class ReceiverUsbHostFragment extends Fragment
 //	private DexterityUsbReceiverService mService;
 
     private TextView mUsbDeviceName;
+    private TextView mBlueToothStatus;
     private TextView mSocketDebug;
     private View mRootView;
 	private DataUpdateReceiver dataUpdateReceiver;
@@ -68,19 +69,20 @@ public class ReceiverUsbHostFragment extends Fragment
         @Override
         public void onReceive(Context context, Intent intent)
 		{
+        	Log.e("TAGDexCollectionService", "Inside onReceive");
 			if (intent.getAction().equals("USB_CONNECT"))
 			{
 			    Log.i(TAG, "USB_CONNECT");
 //				final ToggleButton button = (ToggleButton) mRootView.findViewById(R.id.toggleButton);
 //				button.setChecked(true);
-				mUsbDeviceName.setText("Connected");
+				mUsbDeviceName.setText("usb Connected");
 			}
             else if (intent.getAction().equals("USB_DISCONNECT"))
 			{
                 Log.i(TAG, "USB_DISCONNECT");
 //                final ToggleButton button = (ToggleButton) mRootView.findViewById(R.id.toggleButton);
 //                button.setChecked(false);
-                mUsbDeviceName.setText("Disconnected");
+                mUsbDeviceName.setText("usb Disconnected");
             }
             else if (intent.getAction().equals("NEW_PRINT")){
             	mSocketDebug.setText(ServerSockets.mDebugString);
@@ -88,6 +90,12 @@ public class ReceiverUsbHostFragment extends Fragment
 			else if (intent.getAction().equals("NEW_READ"))
 			{
                 refreshListView();
+            } 
+			else if (intent.getAction().equals("BT_CONNECT")){
+				mBlueToothStatus.setText("bluetooth Connected");            	
+            } 
+			else if (intent.getAction().equals("BT_DISCONNECT")){
+				mBlueToothStatus.setText("bluetooth Disconnected");
             }
         }
     }
@@ -108,6 +116,8 @@ public class ReceiverUsbHostFragment extends Fragment
         LayoutInflater lf = getActivity().getLayoutInflater();
         View rootView = lf.inflate(R.layout.fragment_receiver_usb, container, false);
         mUsbDeviceName = (TextView) rootView.findViewById(R.id.textView4);
+        mBlueToothStatus = (TextView) rootView.findViewById(R.id.BTStatus);
+        
         mSocketDebug = (TextView) rootView.findViewById(R.id.SocketViewDebug);
         mRootView = rootView;
         refreshListView();
@@ -151,9 +161,14 @@ public class ReceiverUsbHostFragment extends Fragment
         intentFilter.addAction("USB_DISCONNECT");
         intentFilter.addAction("NEW_READ");
         intentFilter.addAction("NEW_PRINT");
+        intentFilter.addAction("BT_CONNECT");
+        intentFilter.addAction("BT_DISCONNECT");
         getActivity().registerReceiver(dataUpdateReceiver, intentFilter);
 
         refreshListView();
+        String btStatus = DexCollectionService.getConnectionStatus(getActivity());
+        mBlueToothStatus.setText(btStatus);
+
 
 		/*
         //Bind to Service Start Service

@@ -34,6 +34,13 @@
                 android:defaultValue="63EWA"
         />
         
+        <ListPreference
+            android:key="bt_device"
+            android:title="What xBridge to connect to"
+            android:summary="MAC address of device"
+            android:entries="@array/bt_devices"
+            android:entryValues="@array/bt_devices"
+            android:defaultValue="none"/>
         
         </PreferenceCategory>
 </PreferenceScreen>

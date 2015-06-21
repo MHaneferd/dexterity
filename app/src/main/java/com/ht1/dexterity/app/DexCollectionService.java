@@ -64,19 +64,29 @@ import java.util.UUID;
 class ActiveBluetoothDevice {
 	private final static String TAG = DexCollectionService.class.getSimpleName();
 	
-	static ActiveBluetoothDevice first() {
-		return new ActiveBluetoothDevice();
+	ActiveBluetoothDevice(Context context) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		address = prefs.getString("bt_device", "none");
 	}
 	
-	static void connected() {
-		Log.e(TAG, "Connected");
+	static ActiveBluetoothDevice first(Context context) {
+		return new ActiveBluetoothDevice(context);
+	}
+	
+	static void connected(Context context) {
+		Log.e(TAG, "BT device Connected");
+		context.sendBroadcast(new Intent("BT_CONNECT"));
 		
 	}
-	static void disconnected() {
-		Log.e(TAG, "DisConnected");
+	static void disconnected(Context context) {
+		Log.e(TAG, "BT device DisConnected");
+		context.sendBroadcast(new Intent("BT_DISCONNECT"));
 		
 	}
-	public String address = "20:C3:8F:F3:D2:C0"; 
+	boolean IsConfigured() {
+		return (!address.equals("none"));
+	}
+	public String address;
 }
 
 
@@ -138,6 +148,25 @@ public class DexCollectionService extends Service {
     public final UUID xDripDataService = UUID.fromString(HM_10_SERVICE);
     public final UUID xDripDataCharacteristic = UUID.fromString(HM_RX_TX);
 
+    
+    static public String  getConnectionStatus(Context context) {
+    	ActiveBluetoothDevice activeBluetoothDevice = ActiveBluetoothDevice.first(context);
+    	BluetoothManager BluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        boolean connected = false;
+        if (BluetoothManager != null && activeBluetoothDevice != null) {
+            for (BluetoothDevice bluetoothDevice : BluetoothManager.getConnectedDevices(BluetoothProfile.GATT)) {
+                if (bluetoothDevice.getAddress().compareTo(activeBluetoothDevice.address) == 0) {
+                    connected = true;
+                }
+            }
+        }
+        if(connected) {
+            return "BLuetooth Connected";
+        } else {
+        	return "BLuetooth Disconnected";
+        }
+    }
+    
     @Override
     public IBinder onBind(Intent intent) {
         throw new UnsupportedOperationException("Not yet implemented");
@@ -156,6 +185,7 @@ public class DexCollectionService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+    	Log.d(TAG, "onStartCommand: entering Connection state: " + mConnectionState);
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2){
             stopSelf();
             return START_NOT_STICKY;
@@ -166,7 +196,12 @@ public class DexCollectionService extends Service {
             stopSelf();
             return START_NOT_STICKY;
         }
-        attemptConnection();
+        ActiveBluetoothDevice btDevice = ActiveBluetoothDevice.first(getApplicationContext());
+        if (btDevice.IsConfigured()) {
+        	attemptConnection();
+        } else {
+        	close();
+        }
         return START_STICKY;
     }
 
@@ -182,6 +217,7 @@ public class DexCollectionService extends Service {
 
     public SharedPreferences.OnSharedPreferenceChangeListener prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+        	Log.e(TAG,"Settings have changed");
             if (key.compareTo("run_service_in_foreground") == 0) {
                 Log.e("FOREGROUND", "run_service_in_foreground changed!");
                 if (prefs.getBoolean("run_service_in_foreground", false)) {
@@ -193,16 +229,20 @@ public class DexCollectionService extends Service {
                     Log.w(TAG, "Removing from foreground");
                 }
             }
+            setRetryTimer(1);
         }
+        
     };
 
     public void listenForChangeInSettings() {
         prefs.registerOnSharedPreferenceChangeListener(prefListener);
     }
-
     public void setRetryTimer() {
+    	setRetryTimer(1000 * 65);
+    }
+
+    public void setRetryTimer(long retry_in) {
         if (CollectionServiceStarter.isBTWixel(getApplicationContext()) || CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
-            long retry_in = (1000 * 65);
             Log.d(TAG, "setRetryTimer: Restarting in: " + (retry_in/1000)  + " seconds");
             Calendar calendar = Calendar.getInstance();
             AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -246,7 +286,8 @@ public class DexCollectionService extends Service {
 
                 Log.w(TAG, "attemptConnection: Connection state: " + mConnectionState);
                 if (mConnectionState == STATE_DISCONNECTED || mConnectionState == STATE_DISCONNECTING) {
-                    ActiveBluetoothDevice btDevice = ActiveBluetoothDevice.first();
+                	Log.w(TAG, "inside if .........." + STATE_DISCONNECTED + " " + STATE_DISCONNECTING);
+                    ActiveBluetoothDevice btDevice = ActiveBluetoothDevice.first(getApplicationContext());
                     if (btDevice != null) {
                         mDeviceAddress = btDevice.address;
                         Log.w(TAG, "Device Addresses is " + mDeviceAddress);
@@ -269,13 +310,13 @@ public class DexCollectionService extends Service {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 mConnectionState = STATE_CONNECTED;
-                ActiveBluetoothDevice.connected();
+                ActiveBluetoothDevice.connected(mContext);
                 Log.w(TAG, "onConnectionStateChange: Connected to GATT server.");
                 mBluetoothGatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 mConnectionState = STATE_DISCONNECTED;
                 lastdata = null;
-                ActiveBluetoothDevice.disconnected();
+                ActiveBluetoothDevice.disconnected(mContext);
                 Log.w(TAG, "onConnectionStateChange: Disconnected from GATT server.");
                 setRetryTimer();
             }

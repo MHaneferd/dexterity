@@ -242,7 +242,7 @@ public class SerialPortReader
     		setSerialDataToTransmitterRawData(mContext, trd);
         	return;
         }
-    	Log.e(TAG,"Throwing away packet with wrong tramsission id " + trd.toTableString());
+    	Log.e(TAG,"Throwing away packet with wrong tramsission id. transmitter_id= "+transmitter_id + "object =" + trd.toTableString());
         
 	}
 	

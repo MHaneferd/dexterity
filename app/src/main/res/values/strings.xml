@@ -33,5 +33,9 @@
     <string name="transmitter_id">Transmitter id</string>
     <string name="transmitter_id_summary">Written at the back of trasmitter. Use 0 in order not to filter. When BT is used, will be set on the record. When USB will be used to filter</string>
 
+    <string-array name="bt_devices">
+        <item>none</item>
+        <item>20:C3:8F:F3:D2:C0</item>
+        <item>20:C3:8F:F3:D2:C1</item>
     </string-array>    
 </resources>

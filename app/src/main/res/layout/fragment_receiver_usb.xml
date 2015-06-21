@@ -22,11 +22,20 @@
         android:layout_gravity="center_horizontal"
         android:textColor="#ff6d18" />
 
+        <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="BT status"
+        android:id="@+id/BTStatus"
+        android:layout_gravity="center_horizontal"
+        android:textColor="#ff6d18" />
+    
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/UsbDeviceName"
+        android:text=""
         android:id="@+id/SocketViewDebug"
         android:layout_gravity="center_horizontal"
         android:textColor="#ff6d18" />    
