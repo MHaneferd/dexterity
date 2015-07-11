@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -166,7 +167,12 @@ public class ReceiverUsbHostFragment extends Fragment
         getActivity().registerReceiver(dataUpdateReceiver, intentFilter);
 
         refreshListView();
-        String btStatus = DexCollectionService.getConnectionStatus(getActivity());
+        String btStatus;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+        	btStatus = DexCollectionService.getConnectionStatus(getActivity());
+        } else {
+        	btStatus = "Bluetooh not supported on this android version";
+        }
         mBlueToothStatus.setText(btStatus);
 
 
