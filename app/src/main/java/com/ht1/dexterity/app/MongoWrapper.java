@@ -1,7 +1,11 @@
 package com.ht1.dexterity.app;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -16,9 +20,28 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import android.util.Log;
+
+
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+
+import java.io.UnsupportedEncodingException;
+
 public class MongoWrapper {
 	
+	private static final String TAG = "tzachi";
 	
+	// rest parameters
+    String APIKEY = "D2a6iaurh-oihXrraOquZSySx9QnT_Gs";
+	String DBNAMEREST = "nightscout";
 	
 /*
  old start code 
@@ -99,14 +122,53 @@ public static void main(String[] args) {
     }
 
 */
-	
-	
+
+
 	MongoClient mongoClient_;
 	String dbUriStr_;
 	String dbName_;
 	String collection_;
 	String index_;
 	String machineName_;
+	
+	
+	private static final String UPSERT = "&u=true";
+    private static final int SOCKET_TIMEOUT = 60000;
+    private static final int CONNECTION_TIMEOUT = 30000;
+    private static final String BASE_URL = "https://api.mongolab.com/api/1/databases/";
+
+    private final boolean do_mongo = false;
+    private final boolean do_rest = true;
+    
+	 public boolean sendToMongo(String dbName, String apiKey, String collectionName, /*JSONObject json*/ String jsonString) {
+	     Log.d(TAG, "sendToMongo " + jsonString);
+	     String url = BASE_URL + dbName + "/collections/" + collectionName + "?apiKey=" + apiKey + UPSERT;
+         try {
+             HttpParams params = new BasicHttpParams();
+             HttpConnectionParams.setSoTimeout(params, SOCKET_TIMEOUT);
+             HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
+             DefaultHttpClient httpclient = new DefaultHttpClient(params);
+             HttpPost post = new HttpPost(url);
+             //String jsonString = json.toString();
+             StringEntity se = new StringEntity(jsonString);
+             post.setEntity(se);
+             //post.setHeader("Accept", "application/json");
+		     post.setHeader("Content-type", "application/json");
+		     ResponseHandler responseHandler = new BasicResponseHandler();
+		     httpclient.execute(post, responseHandler);
+		 } catch (ClientProtocolException e) {
+		     Log.e(TAG, "failed: ", e);
+		     return false;
+		 } catch (UnsupportedEncodingException e) {
+		     Log.e(TAG, "failed: ", e);
+		     return false;
+		 } catch (IOException e) {
+		     Log.e(TAG, "failed: ", e);
+		         return false;
+		     }
+	     return true;
+	 }	
+	
 	
 	public MongoWrapper(String dbUriStr, String collection, String index, String machineName) {
 		dbUriStr_ = dbUriStr;
@@ -118,16 +180,19 @@ public static void main(String[] args) {
 	}
 	
 	// Unfortunately, this also throws other exceptions that are not documetned...
-    public DBCollection openMongoDb() throws UnknownHostException {
+    private DBCollection openMongoDb() throws UnknownHostException {
 
-    	MongoClientURI dbUri = new MongoClientURI(dbUriStr_); //?? thros
-	    mongoClient_ = new MongoClient(dbUri);
-	    
-	    DB db = mongoClient_.getDB( dbName_ );
-	    DBCollection coll = db.getCollection(collection_);
-	    coll.createIndex(new BasicDBObject(index_, 1));  // create index on "i", ascending
-	    
-	    return coll;
+    	if (!do_rest) {
+	    	MongoClientURI dbUri = new MongoClientURI(dbUriStr_); //?? thros
+		    mongoClient_ = new MongoClient(dbUri);
+		    
+		    DB db = mongoClient_.getDB( dbName_ );
+		    DBCollection coll = db.getCollection(collection_);
+		    coll.createIndex(new BasicDBObject(index_, 1));  // create index on "i", ascending
+		    
+		    return coll;
+    	}
+    	return null;
 	 
     }
      
@@ -137,19 +202,43 @@ public static void main(String[] args) {
          }
      }
 
+ 	class DebugMessage {
+		 String DebugMessage;
+		 long CaptureDateTime;
+	}
+     
      public boolean WriteDebugDataToMongo(String message)
      {
     	 Long CaptureDateTime = new TimeWrapper().getTime();
     	 String complete = machineName_ + " " + new Date(CaptureDateTime).toLocaleString() + " " + message;
-    	 BasicDBObject doc = new BasicDBObject("DebugMessage", complete).append("CaptureDateTime", CaptureDateTime);
-    	 return WriteToMongo(doc);
+
+    	 if (do_rest) {
+    		Gson gson = new GsonBuilder().create();
+    		 
+    		DebugMessage debug_message = new DebugMessage();
+    		debug_message.CaptureDateTime = CaptureDateTime;
+    		debug_message.DebugMessage = complete;
+    		
+    	    String flat = gson.toJson(debug_message);
+	        return sendToMongo(DBNAMEREST, APIKEY , "SnirData", flat);
+    	 } else {
+	    	 BasicDBObject doc = new BasicDBObject("DebugMessage", complete).append("CaptureDateTime", CaptureDateTime);
+	    	 return WriteToMongo(doc);    		 
+    	 }
      }
 
      
      public boolean WriteToMongo(TransmitterRawData trd)
      {
-    	 BasicDBObject bdbo = trd.toDbObj(machineName_ + " " + new Date(trd.CaptureDateTime).toLocaleString());
-    	 return WriteToMongo(bdbo);
+    	 if(do_rest) {
+    		 Gson gson = new GsonBuilder().create();
+    		String flat = gson.toJson(trd);
+	        
+	        return sendToMongo(DBNAMEREST, APIKEY , "SnirData", flat);
+    	 } else {
+    		 BasicDBObject bdbo = trd.toDbObj(machineName_ + " " + new Date(trd.CaptureDateTime).toLocaleString());
+    		 return WriteToMongo(bdbo);    		 
+    	 }
      }
      
      public boolean WriteToMongo(BasicDBObject bdbo)
