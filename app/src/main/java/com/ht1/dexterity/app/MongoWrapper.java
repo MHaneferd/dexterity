@@ -23,6 +23,8 @@ import java.util.Set;
 import android.util.Log;
 
 
+
+import org.apache.http.HttpResponse;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -38,10 +40,6 @@ import java.io.UnsupportedEncodingException;
 public class MongoWrapper {
 	
 	private static final String TAG = "tzachi";
-	
-	// rest parameters
-    String APIKEY = "D2a6iaurh-oihXrraOquZSySx9QnT_Gs";
-	String DBNAMEREST = "nightscout";
 	
 /*
  old start code 
@@ -131,7 +129,10 @@ public static void main(String[] args) {
 	String index_;
 	String machineName_;
 	
-	
+	// rest parameters
+    String APIKEY = "D2a6iaurh-oihXrraOquZSySx9QnT_Gs";
+	String DBNAMEREST = "nightscout";
+
 	private static final String UPSERT = "&u=true";
     private static final int SOCKET_TIMEOUT = 60000;
     private static final int CONNECTION_TIMEOUT = 30000;
@@ -140,9 +141,10 @@ public static void main(String[] args) {
     private final boolean do_mongo = false;
     private final boolean do_rest = true;
     
-	 public boolean sendToMongo(String dbName, String apiKey, String collectionName, /*JSONObject json*/ String jsonString) {
+	 public boolean sendToMongo(String dbName, String apiKey, String collectionName, String jsonString) {
 	     Log.d(TAG, "sendToMongo " + jsonString);
 	     String url = BASE_URL + dbName + "/collections/" + collectionName + "?apiKey=" + apiKey + UPSERT;
+	     boolean success = false;
          try {
              HttpParams params = new BasicHttpParams();
              HttpConnectionParams.setSoTimeout(params, SOCKET_TIMEOUT);
@@ -154,19 +156,26 @@ public static void main(String[] args) {
              post.setEntity(se);
              //post.setHeader("Accept", "application/json");
 		     post.setHeader("Content-type", "application/json");
-		     ResponseHandler responseHandler = new BasicResponseHandler();
-		     httpclient.execute(post, responseHandler);
+		     HttpResponse response = httpclient.execute(post);
+		     Log.d(TAG, "Send returned code is " + response.getStatusLine().getStatusCode());
+		     if( response.getStatusLine().getStatusCode() == 200) {
+		    	 success  = true;
+		     }
 		 } catch (ClientProtocolException e) {
-		     Log.e(TAG, "failed: ", e);
+		     Log.e(TAG, "sendToMongo ClientProtocolException: ", e);
 		     return false;
 		 } catch (UnsupportedEncodingException e) {
-		     Log.e(TAG, "failed: ", e);
+		     Log.e(TAG, "sendToMongo UnsupportedEncodingException: ", e);
 		     return false;
 		 } catch (IOException e) {
-		     Log.e(TAG, "failed: ", e);
-		         return false;
-		     }
-	     return true;
+		     Log.e(TAG, "sendToMongo IOException: ", e);
+		     return false;
+		 } catch (Exception e) {
+		     Log.e(TAG, "sendToMongo Exception: ", e);
+		     return false;
+		 }
+         
+	     return success;
 	 }	
 	
 	
