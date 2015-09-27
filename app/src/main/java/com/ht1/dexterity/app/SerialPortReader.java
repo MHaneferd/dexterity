@@ -115,6 +115,7 @@ public class SerialPortReader
 		@Override
 		public void run()
 		{
+			NotifyAliveIfNeeded();
 		    try {
     		    Log.w(TAG, "SerialPortReader run called ");
     			Looper.prepare();
