@@ -15,6 +15,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.MongoClientURI;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -219,8 +220,11 @@ public static void main(String[] args) {
      public boolean WriteDebugDataToMongo(String message)
      {
     	 Long CaptureDateTime = new TimeWrapper().getTime();
-    	 String complete = machineName_ + " " + new Date(CaptureDateTime).toLocaleString() + " " + message;
-
+    	 
+    	 SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    	 String time = sdf.format(new Date(CaptureDateTime));
+    	 String complete = machineName_ + " " +time + " " + message;
+    	 
     	 if (do_rest) {
     		Gson gson = new GsonBuilder().create();
     		 
@@ -239,13 +243,20 @@ public static void main(String[] args) {
      
      public boolean WriteToMongo(TransmitterRawData trd)
      {
+    	 SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    	 String time = sdf.format(new Date(trd.CaptureDateTime));
+    	 String DebugInfo = machineName_ + " " + time;
     	 if(do_rest) {
-    		 Gson gson = new GsonBuilder().create();
-    		String flat = gson.toJson(trd);
 	        
+    		
+    		Gson gson = new Gson();
+    		JsonElement jsonElement = gson.toJsonTree(trd);
+    		jsonElement.getAsJsonObject().addProperty("DebugInfo", DebugInfo);
+    		String flat = gson.toJson(jsonElement);
+    		
 	        return sendToMongo(DBNAMEREST, APIKEY , "SnirData", flat);
     	 } else {
-    		 BasicDBObject bdbo = trd.toDbObj(machineName_ + " " + new Date(trd.CaptureDateTime).toLocaleString());
+    		 BasicDBObject bdbo = trd.toDbObj(DebugInfo);
     		 return WriteToMongo(bdbo);    		 
     	 }
      }
