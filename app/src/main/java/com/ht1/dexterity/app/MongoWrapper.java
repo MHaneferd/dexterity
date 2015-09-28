@@ -159,7 +159,7 @@ public static void main(String[] args) {
 		     post.setHeader("Content-type", "application/json");
 		     HttpResponse response = httpclient.execute(post);
 		     Log.d(TAG, "Send returned code is " + response.getStatusLine().getStatusCode());
-		     if( response.getStatusLine().getStatusCode() == 200) {
+		     if( response.getStatusLine().getStatusCode() == 200 || response.getStatusLine().getStatusCode() == 201) {
 		    	 success  = true;
 		     }
 		 } catch (ClientProtocolException e) {
