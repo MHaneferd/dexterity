@@ -139,8 +139,7 @@ public static void main(String[] args) {
     private static final int CONNECTION_TIMEOUT = 30000;
     private static final String BASE_URL = "https://api.mongolab.com/api/1/databases/";
 
-    private final boolean do_mongo = false;
-    private final boolean do_rest = true;
+    private final boolean do_rest = false;
     
 	 public boolean sendToMongo(String dbName, String apiKey, String collectionName, String jsonString) {
 	     Log.d(TAG, "sendToMongo " + jsonString);
