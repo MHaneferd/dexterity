@@ -473,7 +473,7 @@ public class DexCollectionService extends Service {
         	 filtered = 1000 * Integer.parseInt(sfiltered);
          }
          SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-         String transmitter_id = preferences.getString("transmitter_id", "66RRN");
+         String transmitter_id = preferences.getString("transmitter_id", "6ABW4");
 
          Log.w(TAG, "Creating a packet: "+ transmitter_id +" " + id + " " +  raw_data+ " " +  filtered+ " " +  sensor_battery_level+ " " +  bridgeBattery);
          TransmitterRawData trd = new TransmitterRawData(getApplicationContext(), transmitter_id, id, raw_data, filtered, sensor_battery_level, bridgeBattery);

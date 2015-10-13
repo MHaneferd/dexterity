@@ -31,7 +31,7 @@
                 android:summary="@string/transmitter_id_summary"
                 android:key="transmitter_id"
                 android:inputType="text"
-                android:defaultValue="66RRN"
+                android:defaultValue="6ABW4"
         />
         
         <ListPreference

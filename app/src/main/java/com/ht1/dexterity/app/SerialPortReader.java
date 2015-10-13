@@ -237,7 +237,7 @@ public class SerialPortReader
 	private void setSerialDataToTransmitterRawData(byte[] buffer, int len){
 		TransmitterRawData trd = new TransmitterRawData(buffer, len, mContext);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String transmitter_id = preferences.getString("transmitter_id", "66RRN");
+        String transmitter_id = preferences.getString("transmitter_id", "6ABW4");
 
         if(trd.TransmitterId.equals(transmitter_id) || transmitter_id.equals("0")  || transmitter_id.length() ==0) {
     		setSerialDataToTransmitterRawData(mContext, trd);
