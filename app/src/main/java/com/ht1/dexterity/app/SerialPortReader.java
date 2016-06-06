@@ -216,7 +216,7 @@ public class SerialPortReader
 		// Create the mongo writer
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String MachineName = preferences.getString("machineName", "MachineUnknown");
-        String dbUri = preferences.getString("dbUri", "mongodb://tzachi_dar:tzachi_dar@ds053958.mongolab.com:53958/nightscout");
+        String dbUri = preferences.getString("dbUri", "mongodb://tzachi_dar:tzachi@ds053958.mongolab.com:53958/nightscout");
         
         MongoWrapper mt = new MongoWrapper(dbUri, "SnirData", "CaptureDateTime", MachineName);
         return mt;
