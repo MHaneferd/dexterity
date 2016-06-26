@@ -61,8 +61,8 @@ public class DexterityActivity extends Activity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-        
     
+
     }
 
     @Override
@@ -77,9 +77,21 @@ public class DexterityActivity extends Activity
     }
 
     @Override
-    public void onResume() {
+    protected void onResume()
+    {
         super.onResume();
 
+        // In the case that we are running on ATS, we don't wan't our activity showing
+        // At boot, since it blokes the load of other applications.
+        Intent intent = getIntent();
+        if (intent != null)
+        {
+            if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED))
+            {
+            	// Close the activity
+                finish();
+            }
+        }
     }
 
 
