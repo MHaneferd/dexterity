@@ -46,7 +46,7 @@ public class MongoWrapper {
  old start code 
 	
 public static void main(String[] args) {
-    MongoClientURI dbUri = new MongoClientURI("mongodb://tzachi_dar:tzachi_dar@ds053958.mongolab.com:53958/nightscout");
+    MongoClientURI dbUri = new MongoClientURI("mongodb://tzachi_dar:tzachi@ds053958.mongolab.com:53958/nightscout");
     System.out.println( "Starting");
     try {
         

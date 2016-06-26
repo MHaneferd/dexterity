@@ -1,6 +1,5 @@
 package com.ht1.dexterity.app;
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -12,18 +11,11 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
 import android.os.Environment;
-import android.os.FileObserver;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.hoho.android.usbserial.driver.UsbSerialDriver;
-import com.hoho.android.usbserial.driver.UsbSerialProber;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Created by John Costik on 6/7/14.
@@ -98,18 +90,9 @@ public class DexterityUsbReceiverService extends Service
 	{
         super.onCreate();
 
-        StartBroadcastReceiver();
-        StartUsbWatcher();
 
-        // Start logging to logcat
-        String filePath = Environment.getExternalStorageDirectory() + "/tzachilogcat.txt";
-        try {
-        	String[] cmd = { "/system/bin/sh", "-c", "ps | grep logcat  || logcat -f " + filePath + " -v threadtime tzachi:V *:E -r 10240 -n 8" };
-        	Runtime.getRuntime().exec(cmd);
-        } catch (IOException e2) {
-            // TODO Auto-generated catch block
-            e2.printStackTrace();
-        }
+        
+        BootReciever.startLogcat();
         
         // Start the socket thread
         try
@@ -122,8 +105,11 @@ public class DexterityUsbReceiverService extends Service
            Log.e(TAG, "cought IOException...");
            e.printStackTrace();
         }    
+
+        StartBroadcastReceiver();
+        StartUsbWatcher();
         
-        Log.i(TAG, "Starting Service...");
+        Log.i(TAG, "DexterityUsbReceiverService Service started");
     }
 
     @Override
