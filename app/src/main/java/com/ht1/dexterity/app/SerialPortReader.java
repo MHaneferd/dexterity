@@ -1,3 +1,4 @@
+
 package com.ht1.dexterity.app;
 
 import android.app.Notification;
@@ -76,9 +77,19 @@ public class SerialPortReader
 
 	public void StopThread()
 	{
-	    Log.w(TAG, "SerialPortReader StopThread Called");
-		if(mThread != null)
+	    Log.w(TAG, "SerialPortReader StopThread Called mThread = " + mThread);
+		if(mThread != null) {
 			mStop = true;
+			try {
+				mThread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				Log.w(TAG, "SerialPortReader StopThread - got an exception", e);
+			}
+			Log.w(TAG, "SerialPortReader StopThread - joined the thread");
+			
+		}
     }
 
 	public String getErrorString()
@@ -172,8 +183,8 @@ public class SerialPortReader
                                 rbuf[len] = 0;
                                 Log.i(TAG, "Reading we have new data...");
                                 setSerialDataToTransmitterRawData(rbuf, len);
-                            }
-                        }
+                                	}
+                                }
     					catch (IOException e)
     					{
     						//Not a G4 Packet?
