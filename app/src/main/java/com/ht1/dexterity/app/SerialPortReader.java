@@ -1,3 +1,4 @@
+
 package com.ht1.dexterity.app;
 
 import android.app.Notification;
@@ -79,7 +80,7 @@ public class SerialPortReader
 	    Log.w(TAG, "SerialPortReader StopThread Called");
 		if(mThread != null)
 			mStop = true;
-    }
+			}
 
 	public String getErrorString()
 	{
@@ -170,8 +171,17 @@ public class SerialPortReader
                             if (len > 0)
                             {
                                 rbuf[len] = 0;
-                                Log.i(TAG, "Reading we have new data...");
-                                setSerialDataToTransmitterRawData(rbuf, len);
+                                {
+                                	// Log the debug data
+                                	String debugString = new String(rbuf, 0 , len);
+                                	Log.e(TAG,"NEWSTRING" + debugString);
+                                	String lines[] = debugString.split("\\r?\\n");
+                                	for(String s : lines) {
+                                		Log.e(TAG,"NEWSTRING2" + s);
+                                	}
+                                }
+                                Log.i(TAG, "Reading we have new data... ignored");
+                                //setSerialDataToTransmitterRawData(rbuf, len);
                             }
                         }
     					catch (IOException e)
