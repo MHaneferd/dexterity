@@ -14,6 +14,7 @@ import android.hardware.usb.UsbManager;
 import android.os.BatteryManager;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -126,7 +128,7 @@ public class SerialPortReader
 		@Override
 		public void run()
 		{
-			NotifyAliveIfNeeded();
+			WriteDebugDataToMongo(" Starting run uptime sec = " + (SystemClock.elapsedRealtime() / 1000 ));
 		    try {
     		    Log.w(TAG, "SerialPortReader run called ");
     			Looper.prepare();
@@ -222,7 +224,7 @@ public class SerialPortReader
 	}
 
 	
-	static private MongoWrapper CreateMongoWrapper(Context context)
+	static public MongoWrapper CreateMongoWrapper(Context context)
 	{
 		// Create the mongo writer
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -236,8 +238,7 @@ public class SerialPortReader
 	private void NotifyAliveIfNeeded() 
 	{
 		if (new Date().getTime() - mLastDbWriteTime > 330000) {
-		    MongoWrapper mt = CreateMongoWrapper(mContext);
-		    boolean WritenToDb = mt.WriteDebugDataToMongo("Allive, usb connected to wixler");
+		    boolean WritenToDb = WriteDebugDataToMongo("");
 	        if(WritenToDb) {
 	        	Log.e(TAG,"Writing to mongodb that I'm alive... ");
 	        	mLastDbWriteTime = new Date().getTime();
@@ -245,12 +246,18 @@ public class SerialPortReader
 		}
 	}
 	
+	private boolean WriteDebugDataToMongo(String message) {
+		MongoWrapper mt = CreateMongoWrapper(mContext);
+	    boolean WritenToDb = mt.WriteDebugDataToMongo("Allive, usb connected to wixler" + message);
+	    return WritenToDb;
+	}
+	
 	private void setSerialDataToTransmitterRawData(byte[] buffer, int len){
 		TransmitterRawData trd = new TransmitterRawData(buffer, len, mContext);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         String transmitter_id = preferences.getString("transmitter_id", "6ABW4");
 
-        if(trd.TransmitterId.equals(transmitter_id) || transmitter_id.equals("0")  || transmitter_id.length() ==0) {
+        if(trd.TransmitterId.equalsIgnoreCase(transmitter_id) || transmitter_id.equals("0")  || transmitter_id.length() == 0) {
     		setSerialDataToTransmitterRawData(mContext, trd);
         	return;
         }
