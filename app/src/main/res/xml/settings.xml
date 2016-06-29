@@ -42,5 +42,17 @@
             android:entryValues="@array/bt_devices"
             android:defaultValue="none"/>
         
+        <Preference android:title="Verify mongo addresses"
+                android:key="key_test_mongo"
+                android:summary="Not tested"/>
+
+         <Preference android:title="Set transmiter id"
+                android:key="key_copy_txid"
+                android:summary="copy tid from last recieved data"/>
+        
+        
         </PreferenceCategory>
-</PreferenceScreen>
+        
+    
+
+        </PreferenceScreen>
