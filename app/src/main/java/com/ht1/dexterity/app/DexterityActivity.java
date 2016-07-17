@@ -88,6 +88,7 @@ public class DexterityActivity extends Activity
         {
             if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED))
             {
+            	Log.e("tzachi", "DexterityActivity recieved ACTION_USB_DEVICE_ATTACHED - closing UI");
             	// Close the activity
                 finish();
             }

@@ -163,32 +163,40 @@ public class DexterityUsbReceiverService extends Service
         {
             public void run()
             {
-                UsbManager manager = (UsbManager)getSystemService(USB_SERVICE);
-
-                while(true)
-                {
-                    if(mDetached)
-                    {
-                        // we only do anything if we're currently detached.  We have no problem
-                        // getting detach notifications, only attachments.  So we're only polling for attach
-                        for (final UsbDevice usbDevice : manager.getDeviceList().values())
-                        {
-                            // ok iterating all USB devices.  Let's see if it matches our requirements
-                            if(usbDevice.getVendorId() == 8187)
-                            {
-                                // ok, it's by pololu!
-                                sendBroadcast(new Intent("USB_DEVICE_ATTACH"));
-                                mDetached = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    // wait 1/2s and exit this if we're interrupted (terminated?)
-                    try
-                        { Thread.sleep(500); }
-                    catch (InterruptedException exception)
-                        { return; }
+            	Log.e(TAG, "DexterityUsbReceiverService Thread starting");
+            	try {
+	                UsbManager manager = (UsbManager)getSystemService(USB_SERVICE);
+	
+	                while(true)
+	                {
+	                    if(mDetached)
+	                    {
+	                        // we only do anything if we're currently detached.  We have no problem
+	                        // getting detach notifications, only attachments.  So we're only polling for attach
+	                        for (final UsbDevice usbDevice : manager.getDeviceList().values())
+	                        {
+	                            // ok iterating all USB devices.  Let's see if it matches our requirements
+	                            if(usbDevice.getVendorId() == 8187)
+	                            {
+	                                // ok, it's by pololu!
+	                            	Log.e(TAG, "Sending USB_DEVICE_ATTACH");
+	                                sendBroadcast(new Intent("USB_DEVICE_ATTACH"));
+	                                mDetached = false;
+	                                break;
+	                            }
+	                        }
+	                    }
+	
+	                    // wait 1/2s and exit this if we're interrupted (terminated?)
+	                    try { 
+	                    	Thread.sleep(500); 
+	                   }
+	                    catch (InterruptedException exception) { 
+	                		Log.e(TAG, "DexterityUsbReceiverService StartUsbWatcher cought InterruptedException exception - continuing");
+	                    }
+	                }
+                } finally {
+                	Log.e(TAG, "DexterityUsbReceiverService Thread stoping. in finaly");
                 }
             }
         };
