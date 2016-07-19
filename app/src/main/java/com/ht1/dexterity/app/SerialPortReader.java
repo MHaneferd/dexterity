@@ -12,6 +12,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.BatteryManager;
+import android.os.Environment;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
@@ -23,6 +24,9 @@ import com.hoho.android.usbserial.driver.CdcAcmSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -172,6 +176,7 @@ public class SerialPortReader
     					// this is the main loop for transferring
     					try
     					{
+    						tryReadDebugFileAndSendToUsb(SerialPort);
                             //??????????Log.i(TAG, "Reading the wixel...");
     						// read aborts when the device is disconnected
     						long Start = new Date().getTime();
@@ -183,12 +188,21 @@ public class SerialPortReader
                             if (len > 0)
                             {
                                 rbuf[len] = 0;
-                                Log.i(TAG, "Reading we have new data...");
-                                setSerialDataToTransmitterRawData(rbuf, len);
-                                	}
+                                Log.i(TAG, "Reading we have new data (or debug message)...");
+                                String debugString = new String(rbuf, 0 , len);
+                            	Log.e(TAG,"NEWSTRING" + debugString);
+                            	String lines[] = debugString.split("\\r?\\n");
+                            	for(String s : lines) {
+                            		Log.e(TAG,"NEWSTRING2" + s);
+                            	}
+                                try {
+                                	setSerialDataToTransmitterRawData(rbuf, len);
+                                } catch (NumberFormatException e) {
+                                	//Log.i(TAG, "cought NumberFormatException exception when parsing data\n", e);
                                 }
-    					catch (IOException e)
-    					{
+                                
+                            }
+                        } catch (IOException e) {
     						//Not a G4 Packet?
                             ShowToast("Worker thread IOException: " + e.hashCode());
                             // abort this thread
@@ -298,5 +312,34 @@ public class SerialPortReader
 	        }
      	}
 		source.close();
+	}
+	
+	private void tryReadDebugFileAndSendToUsb(UsbSerialDriver SerialPort) {
+		File sdcard = Environment.getExternalStorageDirectory();
+
+		//Get the text file
+		File file = new File(sdcard,"debug.txt");
+		if(!file.exists()) {
+			//Log.i(TAG, "No such file exiting\n");
+			return;
+		}
+
+
+		try {
+		    BufferedReader br = new BufferedReader(new FileReader(file));
+		    String line;
+
+		    while ((line = br.readLine()) != null) {
+		    	Log.e(TAG, "Read DebugMessage " + line);
+		    	line = line + "\n";
+		    	int ret = SerialPort.write(line.getBytes(), 1000 );
+		    	//Log.e(TAG, "writing DebugMessage returned " + ret);
+		    }
+		    br.close();
+		    file.delete();
+		}
+		catch (IOException e) {
+		    Log.e(TAG, "Cought io exception", e);
+		}
 	}
 }
