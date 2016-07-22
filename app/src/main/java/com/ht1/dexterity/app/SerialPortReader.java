@@ -37,89 +37,89 @@ import java.util.List;
  */
 public class SerialPortReader
 {
-	private Thread mThread = null;
-	private Context mContext = null;
-	private static SerialPortReader _instance;
-	private String mError = "";
-	private static final int  MAX_RECORDS_TO_UPLOAD = 6;
+    private Thread mThread = null;
+    private Context mContext = null;
+    private static SerialPortReader _instance;
+    private String mError = "";
+    private static final int  MAX_RECORDS_TO_UPLOAD = 6;
     private boolean mStop = false;
     static private long mLastDbWriteTime = 0;
     private final static String TAG = "tzachi";
 
-	// private constructor so can only be instantiated from static member
-	private SerialPortReader(Context context)
-	{
-		mContext = context;
-	}
+    // private constructor so can only be instantiated from static member
+    private SerialPortReader(Context context)
+    {
+        mContext = context;
+    }
 
-	private void SetContext(Context context)
-	{
-		mContext = context;
-	}
+    private void SetContext(Context context)
+    {
+        mContext = context;
+    }
 
-	public static SerialPortReader getInstance(Context context)
-	{
-		if (_instance == null)
-		{
-			_instance = new SerialPortReader(context);
-		}
+    public static SerialPortReader getInstance(Context context)
+    {
+        if (_instance == null)
+        {
+            _instance = new SerialPortReader(context);
+        }
 
-		// set service.  This survives change in service, since this is a static member
-		_instance.SetContext(context);
-		return _instance;
-	}
+        // set service.  This survives change in service, since this is a static member
+        _instance.SetContext(context);
+        return _instance;
+    }
 
-	public void StartThread()
-   	{
+    public void StartThread()
+       {
         // prevent any pending stop
         mStop = false;
 
         if (mThread == null)
-		{
-			mThread = new Thread(mMainRunLoop);
+        {
+            mThread = new Thread(mMainRunLoop);
             mThread.start();
-		}
-	}
-
-	public void StopThread()
-	{
-	    Log.w(TAG, "SerialPortReader StopThread Called mThread = " + mThread);
-		if(mThread != null) {
-			mStop = true;
-			try {
-				mThread.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				Log.w(TAG, "SerialPortReader StopThread - got an exception", e);
-			}
-			Log.w(TAG, "SerialPortReader StopThread - joined the thread");
-			
-		}
+        }
     }
 
-	public String getErrorString()
-	{
-		return mError;
-	}
+    public void StopThread()
+    {
+        Log.w(TAG, "SerialPortReader StopThread Called mThread = " + mThread);
+        if(mThread != null) {
+            mStop = true;
+            try {
+                mThread.join();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                Log.w(TAG, "SerialPortReader StopThread - got an exception", e);
+            }
+            Log.w(TAG, "SerialPortReader StopThread - joined the thread");
+            
+        }
+    }
 
-	public void ShowToast(final String toast)
-	{
-		// push a notification rather than toast.
-	    Log.w(TAG, "SerialPortReader ShowToast Called " + toast);
-		NotificationManager NM = (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-		Notification n = new Notification.Builder(mContext)
-				.setContentTitle("Dexterity receiver")
-				.setContentText(toast)
-				.setTicker(toast)
-				.setSmallIcon(mContext.getResources().getIdentifier("ic_launcher", "drawable", mContext.getPackageName()))
-				.build();
+    public String getErrorString()
+    {
+        return mError;
+    }
 
-		NM.notify(R.string.notification_ReceiverAttached, n);
-	}
+    public void ShowToast(final String toast)
+    {
+        // push a notification rather than toast.
+        Log.w(TAG, "SerialPortReader ShowToast Called " + toast);
+        NotificationManager NM = (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification n = new Notification.Builder(mContext)
+                .setContentTitle("Dexterity receiver")
+                .setContentText(toast)
+                .setTicker(toast)
+                .setSmallIcon(mContext.getResources().getIdentifier("ic_launcher", "drawable", mContext.getPackageName()))
+                .build();
 
-	private Runnable mMainRunLoop = new Runnable()
-	{
+        NM.notify(R.string.notification_ReceiverAttached, n);
+    }
+
+    private Runnable mMainRunLoop = new Runnable()
+    {
         private void done()
         {
             // clear object in parent so that the thread can be restarted if required
@@ -129,13 +129,13 @@ public class SerialPortReader
             mStop = false;
         }
 
-		@Override
-		public void run()
-		{
-			WriteDebugDataToMongo(" Starting run uptime sec = " + (SystemClock.elapsedRealtime() / 1000 ));
-		    try {
-    		    Log.w(TAG, "SerialPortReader run called ");
-    			Looper.prepare();
+        @Override
+        public void run()
+        {
+            WriteDebugDataToMongo(" Starting run uptime sec = " + (SystemClock.elapsedRealtime() / 1000 ));
+            try {
+                Log.w(TAG, "SerialPortReader run called ");
+                Looper.prepare();
     
                 UsbManager manager = (UsbManager)mContext.getSystemService(mContext.USB_SERVICE);
                 if (manager == null)
@@ -153,143 +153,144 @@ public class SerialPortReader
                 }
     
                 try
-    			{
+                {
                     SerialPort.open();
-    			}
-    			catch (IOException e)
-    			{
-    				SetError(e.getLocalizedMessage());
-    				e.printStackTrace();
+                }
+                catch (IOException e)
+                {
+                    SetError(e.getLocalizedMessage());
+                    e.printStackTrace();
                     done();
-    				return;
-    			}
+                    return;
+                }
     
-    			try
-    			{
+                try
+                {
                     ShowToast("Reading from USB port");
                     mContext.sendBroadcast(new Intent("USB_CONNECT"));
     
-    				byte[] rbuf = new byte[4096];
+                    byte[] rbuf = new byte[4096];
     
-    				while(!mStop)
-    				{
-    					// this is the main loop for transferring
-    					try
-    					{
-    						tryReadDebugFileAndSendToUsb(SerialPort);
+                    while(!mStop)
+                    {
+                        // this is the main loop for transferring
+                        try
+                        {
+                            tryReadDebugFileAndSendToUsb(SerialPort);
                             //??????????Log.i(TAG, "Reading the wixel...");
-    						// read aborts when the device is disconnected
-    						long Start = new Date().getTime();
+                            // read aborts when the device is disconnected
+                            long Start = new Date().getTime();
                             int len = SerialPort.read(rbuf, 30000);
                             long End = new Date().getTime();
                             if (End - Start > 60000) {
-                            	Log.wtf(TAG, "Read took " + (End-Start) + " Instead of 30,000 Start = " + Start);
+                                Log.wtf(TAG, "Read took " + (End-Start) + " Instead of 30,000 Start = " + Start);
                             }
                             if (len > 0)
                             {
                                 rbuf[len] = 0;
-                                Log.i(TAG, "Reading we have new data (or debug message)...");
                                 String debugString = new String(rbuf, 0 , len);
-                            	Log.e(TAG,"NEWSTRING" + debugString);
-                            	String lines[] = debugString.split("\\r?\\n");
-                            	for(String s : lines) {
-                            		Log.e(TAG,"NEWSTRING2" + s);
-                            	}
-                                try {
-                                	setSerialDataToTransmitterRawData(rbuf, len);
-                                } catch (NumberFormatException e) {
-                                	//Log.i(TAG, "cought NumberFormatException exception when parsing data\n", e);
+                                //Log.e(TAG,"NEWSTRING" + debugString);
+                                String lines[] = debugString.split("\\r?\\n");
+                                for(String s : lines) {
+                                    Log.e(TAG,"Wixel: " + s);
+                                    try {
+                                        byte[] b = s.getBytes();
+                                        //setSerialDataToTransmitterRawData(rbuf, len);
+                                        setSerialDataToTransmitterRawData(b, b.length);
+                                    } catch (NumberFormatException e) {
+                                        //Log.i(TAG, "cought NumberFormatException exception when parsing data\n", e);
+                                    }
                                 }
-                                
+
                             }
                         } catch (IOException e) {
-    						//Not a G4 Packet?
+                            //Not a G4 Packet?
                             ShowToast("Worker thread IOException: " + e.hashCode());
                             // abort this thread
                             Log.e(TAG, "cought io exception WTF ???????????/ why are we getting out ?????????");
                             mStop = true;
-    						e.printStackTrace();
-    					}
-    					NotifyAliveIfNeeded();
-    				}
+                            e.printStackTrace();
+                        }
+                        NotifyAliveIfNeeded();
+                    }
     
-    				// do this last as it can throw
+                    // do this last as it can throw
                     SerialPort.close();
-    				Log.i(TAG, "SerialPortReader mStop is true, stopping read process");
-    			}
-    			catch (IOException e)
-    			{
-    				Log.e(TAG,"SerialPortReader cought io exception");
-    				e.printStackTrace();
-    			}
+                    Log.i(TAG, "SerialPortReader mStop is true, stopping read process");
+                }
+                catch (IOException e)
+                {
+                    Log.e(TAG,"SerialPortReader cought io exception");
+                    e.printStackTrace();
+                }
                 done();
-		    }
-		    finally {
-		      Log.e(TAG, "SerialPortReader We are leaving the SerialPortReader run do we know why???? ");
-		    }
-		}
-	};
+            }
+            finally {
+              Log.e(TAG, "SerialPortReader We are leaving the SerialPortReader run do we know why???? ");
+            }
+        }
+    };
 
-	private void SetError(String sError)
-	{
-		mError = sError;
-		ShowToast(mError);
-		Log.e(TAG, mError);
-	}
+    private void SetError(String sError)
+    {
+        mError = sError;
+        ShowToast(mError);
+        Log.e(TAG, mError);
+    }
 
-	
-	static public MongoWrapper CreateMongoWrapper(Context context)
-	{
-		// Create the mongo writer
+    
+    static public MongoWrapper CreateMongoWrapper(Context context)
+    {
+        // Create the mongo writer
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String MachineName = preferences.getString("machineName", "MachineUnknown");
         String dbUri = preferences.getString("dbUri", "mongodb://tzachi_dar:tzachi@ds053958.mongolab.com:53958/nightscout");
         
         MongoWrapper mt = new MongoWrapper(dbUri, "SnirData", "CaptureDateTime", MachineName);
         return mt;
-	}
+    }
 
-	private void NotifyAliveIfNeeded() 
-	{
-		if (new Date().getTime() - mLastDbWriteTime > 330000) {
-		    boolean WritenToDb = WriteDebugDataToMongo("");
-	        if(WritenToDb) {
-	        	Log.e(TAG,"Writing to mongodb that I'm alive... ");
-	        	mLastDbWriteTime = new Date().getTime();
-	        }
-		}
-	}
-	
-	private boolean WriteDebugDataToMongo(String message) {
-		MongoWrapper mt = CreateMongoWrapper(mContext);
-	    boolean WritenToDb = mt.WriteDebugDataToMongo("Allive, usb connected to wixler" + message);
-	    return WritenToDb;
-	}
-	
-	private void setSerialDataToTransmitterRawData(byte[] buffer, int len){
-		TransmitterRawData trd = new TransmitterRawData(buffer, len, mContext);
+    private void NotifyAliveIfNeeded() 
+    {
+        if (new Date().getTime() - mLastDbWriteTime > 330000) {
+            boolean WritenToDb = WriteDebugDataToMongo("");
+            if(WritenToDb) {
+                Log.e(TAG,"Writing to mongodb that I'm alive... ");
+                mLastDbWriteTime = new Date().getTime();
+            }
+        }
+    }
+    
+    private boolean WriteDebugDataToMongo(String message) {
+        MongoWrapper mt = CreateMongoWrapper(mContext);
+        boolean WritenToDb = mt.WriteDebugDataToMongo("Allive, usb connected to wixler" + message);
+        return WritenToDb;
+    }
+    
+    private void setSerialDataToTransmitterRawData(byte[] buffer, int len){
+        TransmitterRawData trd = new TransmitterRawData(buffer, len, mContext);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         String transmitter_id = preferences.getString("transmitter_id", "6ABW4");
 
         if(trd.TransmitterId.equalsIgnoreCase(transmitter_id) || transmitter_id.equals("0")  || transmitter_id.length() == 0) {
-    		setSerialDataToTransmitterRawData(mContext, trd);
-        	return;
+            setSerialDataToTransmitterRawData(mContext, trd);
+            return;
         }
-    	Log.e(TAG,"Throwing away packet with wrong tramsission id. transmitter_id= "+transmitter_id + "object =" + trd.toTableString());
+        Log.e(TAG,"Throwing away packet with wrong tramsission id. transmitter_id= "+transmitter_id + "object =" + trd.toTableString());
         
-	}
-	
-	static public void setSerialDataToTransmitterRawData(Context context, TransmitterRawData trd)
-	{
-		boolean WritenToDb = false;
+    }
+    
+    static public void setSerialDataToTransmitterRawData(Context context, TransmitterRawData trd)
+    {
+        boolean WritenToDb = false;
 
-		DexterityDataSource source = new DexterityDataSource(context);
-		trd = source.createRawDataEntry(trd);
-		Log.e(TAG,"Just created a TRD, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
-		List<TransmitterRawData> retryList = source.getAllDataObjects(true, true, 10000);
-		
-		Log.e(TAG, "retry list size is "+ retryList.size());
-		
+        DexterityDataSource source = new DexterityDataSource(context);
+        trd = source.createRawDataEntry(trd);
+        Log.e(TAG,"Just created a TRD, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
+        List<TransmitterRawData> retryList = source.getAllDataObjects(true, true, 10000);
+        
+        Log.e(TAG, "retry list size is "+ retryList.size());
+        
 
         // we got the read, we should notify
         context.sendBroadcast(new Intent("NEW_READ"));
@@ -297,49 +298,49 @@ public class SerialPortReader
         // upload the data to the database
         MongoWrapper mt = CreateMongoWrapper(context);
 
-		for (int j = 0; j < retryList.size(); ++j) {
-			trd = retryList.get(j);
-			Log.e(TAG,"Before write TRD, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
-			WritenToDb = mt.WriteToMongo(trd);
-	        if(WritenToDb) {
-	        	Log.e(TAG,"Write succeeded TRD, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
-	        	mLastDbWriteTime = new Date().getTime();
-	        	trd.setUploaded(1);
-	        	source.updateRawDataEntry(trd);
-	        } else {
-	        	Log.e(TAG,"Write failed, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
-	        	break;
-	        }
-     	}
-		source.close();
-	}
-	
-	private void tryReadDebugFileAndSendToUsb(UsbSerialDriver SerialPort) {
-		File sdcard = Environment.getExternalStorageDirectory();
+        for (int j = 0; j < retryList.size(); ++j) {
+            trd = retryList.get(j);
+            Log.e(TAG,"Before write TRD, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
+            WritenToDb = mt.WriteToMongo(trd);
+            if(WritenToDb) {
+                Log.e(TAG,"Write succeeded TRD, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
+                mLastDbWriteTime = new Date().getTime();
+                trd.setUploaded(1);
+                source.updateRawDataEntry(trd);
+            } else {
+                Log.e(TAG,"Write failed, " + trd.TransmissionId + " CaptureDateTime " + trd.CaptureDateTime);
+                break;
+            }
+         }
+        source.close();
+    }
+    
+    private void tryReadDebugFileAndSendToUsb(UsbSerialDriver SerialPort) {
+        File sdcard = Environment.getExternalStorageDirectory();
 
-		//Get the text file
-		File file = new File(sdcard,"debug.txt");
-		if(!file.exists()) {
-			//Log.i(TAG, "No such file exiting\n");
-			return;
-		}
+        //Get the text file
+        File file = new File(sdcard,"debug.txt");
+        if(!file.exists()) {
+            //Log.i(TAG, "No such file exiting\n");
+            return;
+        }
 
 
-		try {
-		    BufferedReader br = new BufferedReader(new FileReader(file));
-		    String line;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
 
-		    while ((line = br.readLine()) != null) {
-		    	Log.e(TAG, "Read DebugMessage " + line);
-		    	line = line + "\n";
-		    	int ret = SerialPort.write(line.getBytes(), 1000 );
-		    	//Log.e(TAG, "writing DebugMessage returned " + ret);
-		    }
-		    br.close();
-		    file.delete();
-		}
-		catch (IOException e) {
-		    Log.e(TAG, "Cought io exception", e);
-		}
-	}
+            while ((line = br.readLine()) != null) {
+                Log.e(TAG, "Read DebugMessage " + line);
+                line = line + "\n";
+                int ret = SerialPort.write(line.getBytes(), 1000 );
+                //Log.e(TAG, "writing DebugMessage returned " + ret);
+            }
+            br.close();
+            file.delete();
+        }
+        catch (IOException e) {
+            Log.e(TAG, "Cought io exception", e);
+        }
+    }
 }
