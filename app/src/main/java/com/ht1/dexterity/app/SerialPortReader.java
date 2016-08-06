@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
+import java.lang.ArrayIndexOutOfBoundsException;
 /**
  * Created by John Costik on 6/7/14.
  */
@@ -44,6 +44,7 @@ public class SerialPortReader
     private static final int  MAX_RECORDS_TO_UPLOAD = 6;
     private boolean mStop = false;
     static private long mLastDbWriteTime = 0;
+    private String mConfiguredTransmiterId = "";
     private final static String TAG = "tzachi";
 
     // private constructor so can only be instantiated from static member
@@ -129,10 +130,36 @@ public class SerialPortReader
             mStop = false;
         }
 
+        private void ConfigWixel(UsbSerialDriver SerialPort) {
+            //Log.e(TAG, "ConfigWixel called mConfiguredTransmiterId = " + mConfiguredTransmiterId);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+            
+            String transmitter_id = preferences.getString("transmitter_id", "6ABW4");
+            if (transmitter_id.equalsIgnoreCase(mConfiguredTransmiterId)) {
+                return;
+            }
+            try {
+                    String cmd ="HELLO\n";
+                    SerialPort.write(cmd.getBytes(), 1000);
+                    cmd ="OUTNUM=4\n";
+                    SerialPort.write(cmd.getBytes(), 1000);
+                    
+                    if((!transmitter_id.equals("0"))  && (!(transmitter_id.length() == 0)) ) {
+                        cmd ="TXID=" + transmitter_id.toUpperCase() + "\n";
+                        SerialPort.write(cmd.getBytes(), 1000);
+                        mConfiguredTransmiterId = transmitter_id;
+                    }
+                
+            }
+            catch (IOException e) {
+                Log.e(TAG, "Cought io exception when configuring device", e);
+            }
+        }
+        
         @Override
         public void run()
         {
-            WriteDebugDataToMongo(" Starting run uptime sec = " + (SystemClock.elapsedRealtime() / 1000 ));
+            WriteDebugDataToMongo("Starting run uptime sec = " + (SystemClock.elapsedRealtime() / 1000 ));
             try {
                 Log.w(TAG, "SerialPortReader run called ");
                 Looper.prepare();
@@ -173,6 +200,7 @@ public class SerialPortReader
     
                     while(!mStop)
                     {
+                        ConfigWixel(SerialPort);
                         // this is the main loop for transferring
                         try
                         {
@@ -198,7 +226,9 @@ public class SerialPortReader
                                         //setSerialDataToTransmitterRawData(rbuf, len);
                                         setSerialDataToTransmitterRawData(b, b.length);
                                     } catch (NumberFormatException e) {
-                                        //Log.i(TAG, "cought NumberFormatException exception when parsing data\n", e);
+                                        // Log.i(TAG, "cought NumberFormatException exception when parsing data\n", e);
+                                    } catch (ArrayIndexOutOfBoundsException e) {
+                                        // Log.e(TAG, "cought ArrayIndexOutOfBoundsException exception when parsing data\n", e);
                                     }
                                 }
 
@@ -267,11 +297,31 @@ public class SerialPortReader
         return WritenToDb;
     }
     
+    private boolean IsDuplicate(TransmitterRawData trd) {
+        DexterityDataSource source = new DexterityDataSource(mContext);
+        List<TransmitterRawData> retryList = source.getAllDataObjects(false, false, 1);
+        if(retryList.size() ==0) {
+            return false;
+        }
+        TransmitterRawData lastTrd = retryList.get(0);
+        if(lastTrd.RawValue == trd.RawValue && 
+                lastTrd.TransmissionId == trd.TransmissionId &&
+                lastTrd.FilteredValue == trd.FilteredValue) {
+            return true;
+        }
+        return false;
+    }
+    
     private void setSerialDataToTransmitterRawData(byte[] buffer, int len){
         TransmitterRawData trd = new TransmitterRawData(buffer, len, mContext);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         String transmitter_id = preferences.getString("transmitter_id", "6ABW4");
 
+        if(IsDuplicate(trd)) {
+            Log.e(TAG, "Ignoring a duplicate packet");
+            return;
+        }
+        
         if(trd.TransmitterId.equalsIgnoreCase(transmitter_id) || transmitter_id.equals("0")  || transmitter_id.length() == 0) {
             setSerialDataToTransmitterRawData(mContext, trd);
             return;

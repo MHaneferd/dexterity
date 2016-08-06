@@ -192,7 +192,7 @@ public static void main(String[] args) {
     private DBCollection openMongoDb() throws UnknownHostException {
 
     	if (!do_rest) {
-	    	MongoClientURI dbUri = new MongoClientURI(dbUriStr_); //?? thros
+	    	MongoClientURI dbUri = new MongoClientURI(dbUriStr_+"?socketTimeoutMS=180000"); //?? thros
 		    mongoClient_ = new MongoClient(dbUri);
 		    
 		    DB db = mongoClient_.getDB( dbName_ );

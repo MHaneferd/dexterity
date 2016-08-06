@@ -6,6 +6,7 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 
 import java.util.Date;
+
 import com.mongodb.BasicDBObject;
 /**
  * Created by John Costik on 6/7/14.
@@ -162,6 +163,10 @@ public class TransmitterRawData {
         }
         String[] parsed = toParse.toString().split("\\s+");
 
+        if(parsed.length < 6) {
+            throw new ArrayIndexOutOfBoundsException("Failed to parse " + toParse.toString());
+        }
+        
         RawValue = Integer.parseInt(parsed[1]);
         FilteredValue = Integer.parseInt(parsed[2]);
         TransmitterId = parsed[0];
