@@ -1,14 +1,24 @@
 
 # Table and ips of different devices:
 
-1) small Tablet (dhcp) 192.168.1.10
-1) big Tablet (dhcp) 192.168.1.81
-2) cx-918: (static) 192.168.1.2
-3) mx8: (static) 192.168.1.3
-4) mk808b (dhcp) salon 192.168.1.160 50010
-5) mk808b (dhcp) misdaron 192.168.1.217 50005
+1) cx-918: (static) 192.168.1.2
+2) mx8: (static) 192.168.1.3
+3) small tablet: (static) 192.168.1.4
+4) big tablet: (static) 192.168.1.5
+5) ???? 192.168.1.9
+
+
+
+
 6) cx-918(1) dhcp 192.168.1.20 (mac=6c-fa-a7-6d-b9-f6)
 7) cx-918(2) dhcp 192.168.1.105 (mac=6c-fa-a7-6d-ba-fc)
+
+8) salon 	192.168.001.023 -  (ccd29b35004d)
+9) misdaron 2   192.168.1.92 - (6c:fa:a7:6c:22:ea)
+10)Experimental machine  192.168.1.231          6c-fa-a7-6c-23-3b
+10)Experimental machine 2  192.168.1.35         cc-79-cf-74-b2-ed?s
+
+
 
 c:\Users\nirit\Downloads\pscp.exe app-debug.apk  root@192.168.1.27:/sdcard/
 
@@ -19,8 +29,12 @@ grep -vi LIST tzachilogcat.txt | grep -v Data | grep -v source | grep -v Recieve
 get the logs: pscp root@192.168.1.27:/sdcard/tzachilogcat.txt .
 pscp app/build/outputs/apk/app-debug.apk  root@192.168.1.27:/data/app/com.ht1.dexterity.app-1.apk
 
-// for the tablet...
-pscp app/build/outputs/apk/app-debug.apk  root@192.168.1.81:/data/app/com.eveningoutpost.dexdrip-1.apk
+// for the big tablet...
+pscp app/build/outputs/apk/app-xDrip-debug.apk  root@192.168.1.5:/data/app/com.eveningoutpost.dexdrip-1.apk
+
+
+// for the small tablet (viewer): 
+pscp app/build/outputs/apk/app-xDripViewer-debug.apk root@192.168.1.4:/data/app/com.eveningoutpost.dexdrip.viewer-1.apk
 
 "C:\Program Files\Java\jdk1.8.0_05\bin\javac.exe" -classpath C:\Users\nirit\take2\dexterity\app\libs\mongo-java-driver-2.12.3.jar;. MongoTry.java
 
@@ -35,3 +49,13 @@ pscp app/build/outputs/apk/app-debug.apk  root@192.168.1.81:/data/app/com.evenin
 
 
 
+rest api
+"C:\Program Files\Java\jdk1.8.0_05\bin\javac.exe" -classpath c:\Users\nirit\AppData\Local\Android\android-studio\lib\gson-2.2.4.jar;mongo-java-driver-3.0.4.jar;apache-httpcomponents-httpclient.jar;commons-httpclient-3.1.0.jar;http-core-4.1.jar *.java
+
+"C:\Program Files\Java\jdk1.8.0_05\bin\java.exe" -classpath c:\Users\nirit\AppData\Local\Android\android-studio\lib\gson-2.2.4.jar;.;;mongo-java-driver-3.0.4.jar;apache-httpcomponents-httpclient.jar;commons-httpclient-3.1.0.jar;http-core-4.1.jar;org-apache-commons-logging.jar ReadData
+
+"C:\Program Files\Java\jdk1.8.0_05\bin\javac.exe" -classpath c:\Users\nirit\AppData\Local\Android\android-studio\lib\gson-2.2.4.jar;mongo-java-driver-3.0.4.jar;apache-httpcomponents-httpclient.jar;commons-httpclient-3.1.0.jar;http-core-4.1.jar *.java
+"C:\Program Files\Java\jdk1.8.0_05\bin\java.exe" -classpath c:\Users\nirit\AppData\Local\Android\android-studio\lib\gson-2.2.4.jar;.;mongo-java-driver-3.0.4.jar ReadData mongodb://tzachi_dar:tzachi_dar@ds053958.mongolab.com:53958/nightscout/SnirData 10
+
+For the pi:
+pscp apps\dexterity_wixel\dexterity_wixel.wxl pi@raspberrypi:/home/pi/wixel_linux
