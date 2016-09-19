@@ -44,7 +44,7 @@ public class SerialPortReader
     private static final int  MAX_RECORDS_TO_UPLOAD = 6;
     private boolean mStop = false;
     static private long mLastDbWriteTime = 0;
-    private String mConfiguredTransmiterId = "";
+
     private final static String TAG = "tzachi";
 
     // private constructor so can only be instantiated from static member
@@ -121,6 +121,7 @@ public class SerialPortReader
 
     private Runnable mMainRunLoop = new Runnable()
     {
+        private String mConfiguredTransmiterId = "";
         private void done()
         {
             // clear object in parent so that the thread can be restarted if required
@@ -159,6 +160,7 @@ public class SerialPortReader
         @Override
         public void run()
         {
+        	mConfiguredTransmiterId = "";
             WriteDebugDataToMongo("Starting run uptime sec = " + (SystemClock.elapsedRealtime() / 1000 ));
             try {
                 Log.w(TAG, "SerialPortReader run called ");
