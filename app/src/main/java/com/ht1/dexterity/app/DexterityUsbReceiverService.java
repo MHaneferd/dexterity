@@ -115,6 +115,7 @@ public class DexterityUsbReceiverService extends Service
     @Override
     public void onDestroy()
 	{
+    	Log.i(TAG, "DexterityUsbReceiverService Service stoped");
         super.onDestroy();
         // stop the socket thread
         mServerSocket.Stop();
@@ -140,7 +141,7 @@ public class DexterityUsbReceiverService extends Service
                     Log.i(TAG, "StartBroadcastReceiver: ACTION_USB_DEVICE_DETACHED");
                     mDetached = true;
                     stopSerialRead();
-                    StartUsbWatcher();
+//                    StartUsbWatcher();
                 }
                 else if(intent.getAction().equals("USB_DEVICE_ATTACH"))
                 {
