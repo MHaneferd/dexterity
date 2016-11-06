@@ -135,7 +135,7 @@ public class SerialPortReader
             //Log.e(TAG, "ConfigWixel called mConfiguredTransmiterId = " + mConfiguredTransmiterId);
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
             
-            String transmitter_id = preferences.getString("transmitter_id", "6ABW4");
+            String transmitter_id = preferences.getString("transmitter_id", "6FKJE");
             if (transmitter_id.equalsIgnoreCase(mConfiguredTransmiterId)) {
                 return;
             }
@@ -317,7 +317,7 @@ public class SerialPortReader
     private void setSerialDataToTransmitterRawData(byte[] buffer, int len){
         TransmitterRawData trd = new TransmitterRawData(buffer, len, mContext);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String transmitter_id = preferences.getString("transmitter_id", "6ABW4");
+        String transmitter_id = preferences.getString("transmitter_id", "6FKJE");
 
         if(IsDuplicate(trd)) {
             Log.e(TAG, "Ignoring a duplicate packet");
