@@ -29,7 +29,7 @@ public class ServerSockets  extends Thread {
 	// TODO: rename class...
 
     static public String mDebugString;
-    private final String TAG = "tzachi";
+    private final String TAG = "ServerSockets";
 
     private volatile boolean mStop = false;
     
@@ -60,6 +60,8 @@ public class ServerSockets  extends Thread {
         ServerSocket ServerSocket = null;
         boolean closeSocket = false;
         int listenOnPort = -1;
+        
+        Log.e("tzachi", "Thread starting");
         
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         

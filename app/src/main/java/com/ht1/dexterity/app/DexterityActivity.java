@@ -42,6 +42,8 @@ public class DexterityActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.e("tzachi", "DexterityActivity onCreate called");
+        
 		// start the service from here
 		Intent serviceIntent = new Intent(this, DexterityUsbReceiverService.class);
 		startService(serviceIntent);
