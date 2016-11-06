@@ -30,6 +30,7 @@ get the logs: pscp root@192.168.1.27:/sdcard/tzachilogcat.txt .
 pscp app/build/outputs/apk/app-debug.apk  root@192.168.1.27:/data/app/com.ht1.dexterity.app-1.apk
 
 // for the big tablet...
+pscp app/build/outputs/apk/app-debug.apk  root@192.168.1.5:/data/app/com.eveningoutpost.dexdrip-1.apk
 pscp app/build/outputs/apk/app-xDrip-debug.apk  root@192.168.1.5:/data/app/com.eveningoutpost.dexdrip-1.apk
 
 

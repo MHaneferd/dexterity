@@ -72,7 +72,8 @@ public class SerialPortReader
 
     public void StartThread()
        {
-        // prevent any pending stop
+    	 Log.w(TAG, "SerialPortReader StartThread Called mThread = " + mThread);
+        // prevent any pending stop ??????????????
         mStop = false;
 
         if (mThread == null)
@@ -210,8 +211,20 @@ public class SerialPortReader
                             //??????????Log.i(TAG, "Reading the wixel...");
                             // read aborts when the device is disconnected
                             long Start = new Date().getTime();
+                            Log.e(TAG,"Before SerialPort.read");
                             int len = SerialPort.read(rbuf, 30000);
+                            Log.e(TAG,"After SerialPort.read len = " + len);
                             long End = new Date().getTime();
+                            if(End - Start < 20 && len == 0 ) {
+                            	Log.e(TAG, "after 0 read sleeping 10 seconds to save the log file ");
+                            	try { 
+        	                    	Thread.sleep(10000); 
+        	                   }
+        	                    catch (InterruptedException exception) { 
+        	                		Log.e(TAG, "Exception while sleeping - continuing");
+        	                    }
+                            	
+                            }
                             if (End - Start > 60000) {
                                 Log.wtf(TAG, "Read took " + (End-Start) + " Instead of 30,000 Start = " + Start);
                             }
