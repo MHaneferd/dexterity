@@ -14,8 +14,8 @@
 7) cx-918(2) dhcp 192.168.1.105 (mac=6c-fa-a7-6d-ba-fc)
 
 8) salon 	192.168.001.023 -  (ccd29b35004d)
-9) misdaron 2   192.168.1.92 - (6c:fa:a7:6c:22:ea)
-10)Experimental machine  192.168.1.231          6c-fa-a7-6c-23-3b
+9) misdaron 2   192.168.1.105 - (6c:fa:a7:6c:22:ea)
+10)Experimental machine  192.168.1.6          6c-fa-a7-6c-23-3b
 10)Experimental machine 2  192.168.1.35         cc-79-cf-74-b2-ed?s
 
 

@@ -162,7 +162,7 @@ public class SerialPortReader
         public void run()
         {
         	mConfiguredTransmiterId = "";
-            WriteDebugDataToMongo("Starting run uptime sec = " + (SystemClock.elapsedRealtime() / 1000 ));
+            WriteDebugDataToMongo(mContext, "Allive, usb connected to wixler - Starting run uptime sec = " + (SystemClock.elapsedRealtime() / 1000 ));
             try {
                 Log.w(TAG, "SerialPortReader run called ");
                 Looper.prepare();
@@ -298,7 +298,7 @@ public class SerialPortReader
     private void NotifyAliveIfNeeded() 
     {
         if (new Date().getTime() - mLastDbWriteTime > 330000) {
-            boolean WritenToDb = WriteDebugDataToMongo("");
+            boolean WritenToDb = WriteDebugDataToMongo(mContext, "Allive, usb connected to wixler");
             if(WritenToDb) {
                 Log.e(TAG,"Writing to mongodb that I'm alive... ");
                 mLastDbWriteTime = new Date().getTime();
@@ -306,9 +306,10 @@ public class SerialPortReader
         }
     }
     
-    private boolean WriteDebugDataToMongo(String message) {
-        MongoWrapper mt = CreateMongoWrapper(mContext);
-        boolean WritenToDb = mt.WriteDebugDataToMongo("Allive, usb connected to wixler" + message);
+    public static boolean WriteDebugDataToMongo(Context context, String message) {
+    	Log.e(TAG, "writing to mongo !!! " + message);
+        MongoWrapper mt = CreateMongoWrapper(context);
+        boolean WritenToDb = mt.WriteDebugDataToMongo( message);
         return WritenToDb;
     }
     
@@ -390,7 +391,7 @@ public class SerialPortReader
             return;
         }
 
-
+        
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line;

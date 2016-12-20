@@ -12,11 +12,15 @@ import android.hardware.usb.UsbManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.util.Log;
 
 
+import java.io.File;
 import java.io.IOException;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.lang.ProcessBuilder;
 /**
  * Created by John Costik on 6/7/14.
  */
@@ -139,6 +143,7 @@ public class DexterityUsbReceiverService extends Service
                 if(intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED))
                 {
                     Log.i(TAG, "StartBroadcastReceiver: ACTION_USB_DEVICE_DETACHED");
+                    rebootSystemOnDetach(context);
                     mDetached = true;
                     stopSerialRead();
 //                    StartUsbWatcher();
@@ -207,6 +212,59 @@ public class DexterityUsbReceiverService extends Service
     }
 
 
+    static void RunCommand(String[] cmd ) {
+        // Start logging to logcat
+        try {
+        	Runtime.getRuntime().exec(cmd);
+        } catch (IOException e2) {
+            // TODO Auto-generated catch block
+            Log.e(TAG, "Error running command");
+        }
+    }
+    
+    public static void rebootSystemOnDetach(final Context context) {
+    	Log.e(TAG, "recieved ACTION_USB_DEVICE_DETACHED rebooting system");
+    	
+	   	 Long CaptureDateTime = new TimeWrapper().getTime();
+		 
+	   	 SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
+	   	 String time = sdf.format(new Date(CaptureDateTime));
+	   	 String file_name = Environment.getExternalStorageDirectory() + "/dmesg_" +time + ".txt";
+    	
+	   	ProcessBuilder pb = new ProcessBuilder(new String[] {"su", "-c", "dmesg > "+ file_name});
+	   	Log.e(TAG, "after dmesg");
+	   	try {
+			pb.start();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Log.e(TAG, "got exception, runnging dmesg", e);
+			e.printStackTrace();
+		}
+	   	
+	   	// Do the send on another thread since we are on the UI thread. We give this operation a few seconds to complete. 
+        new Thread() {
+            @Override
+            public void run() {
+            	SerialPortReader.WriteDebugDataToMongo(context, "Rebooting system because of detach uptime sec = " + (SystemClock.elapsedRealtime() / 1000 ));
+            }
+        }.start();
+    	
+    	
+    	try { 
+        	Thread.sleep(15000); 
+       }
+        catch (InterruptedException exception) { 
+    		Log.e(TAG, "DexterityUsbReceiverService rebootSystemOnDetach  cought InterruptedException exception - continuing");
+        }
+    	
+    	Log.e(TAG,"before reboot (trying both path locations)");
+    	String[] cmd = {"/system/xbin/su", "-c", "reboot now"}; // might be /system/bin/su without the x this has worked on some systems...
+    	RunCommand(cmd);
+    	String[] cmd1 = {"/system/bin/su", "-c", "reboot now"}; 
+    	RunCommand(cmd1);
+    	Log.e(TAG,"after reboot");
+    	
+    }
 
 
 
